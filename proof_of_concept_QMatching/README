@@ -1,0 +1,18 @@
+This directory contains a proof of concept for one part of the algorithm.
+
+It has proven to successfully identify questions based on the weighting scheme as layed out in
+the function "rank". A score of 4 must be achieved for a line in the interview to match
+one of the questions.
+
+to run:
+
+java findquesions file
+
+The file must be a transcription of an interview. It must only contain a transcription of question 8 
+from start to finish. There can be extensions made to this program to find question 8 without
+assistance needed from human preprocessing. 
+
+files are located in:
+../transcripts_q8/
+
+CREATED ON: OCTOBER 19 2014
