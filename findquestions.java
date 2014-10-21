@@ -44,23 +44,24 @@ class findquestions{
         int starting_index = 0;
         searchstatus status = new searchstatus(0,0,false,false);
         String[] responses = fillNullArray(numberofquestions);//new String[numberofquestions];
-        while ((line = buffer.readLine()) != null) {
+        while ((line = buffer.readLine()) != null) {       
            rank(line, starting_index, keyword_question, status);
+           if(status.current_question >= responses.length){
+             break;
+           }
            if(status.success_status == true)
            {  
+              responses[status.question_matched] += (line + "\n");
               starting_index = status.current_question;
-              responses[status.current_question] += line;
            }else{
-              System.out.printf("***RESPONSE: %s\n",line);
+              if(line.contains("Speaker 2")){
+                responses[status.question_matched] += (line + "\n");
+              }
            }
-          //contain the response for that question
-         // if(status.current_question<numberofquestions){
-              responses[status.current_question] += (line + "\n");
-              
-       //   }else{
-       //       break;
-       //   }
+           //contain the response for that question
+           
         }
+        analyzeResponses(responses);
         buffer.close(); 
         /*for(int print_itor = 0; print_itor<responses.length; print_itor++){
             if(responses[print_itor]!="\n"){
@@ -69,6 +70,19 @@ class findquestions{
         }*/
      }catch(IOException e){
            System.err.println("Caught IOException: " + e.getMessage());
+     }
+  }
+
+  protected static void analyzeResponses(String[] responses)
+  {
+     for(int question_num = 0; question_num < responses.length; question_num++)
+     {
+       if(responses[question_num]=="\n"){
+          continue;
+       }
+      // //else there is content in this index. Index 2 is for question 2 and hold's responses to q2 and so on...
+       System.out.printf("QUESTION NUMBER: %d\n",question_num);
+       System.out.println("RESPONSE: "+responses[question_num] + "\n\n");
      }
   }
 
@@ -83,7 +97,7 @@ class findquestions{
   //the problem right now is that recovering is bad from a misplaced question. perhaps it is best to always start from 0 not staring_index??
   protected static void rank(String line, int starting_index, keyvalue[] keyword_question, searchstatus status)
   {
-      if(starting_index<keyword_question.length){
+      if(starting_index>=keyword_question.length){
         return;
       }
       int score = 0;
@@ -109,7 +123,7 @@ class findquestions{
             3. return the success status & if success: which question was matched to caputure response
            */
             if(score>4){
-                System.out.println("\n\nMatchFound!\nSCORE: " + score + "\nQuestion: "+itor+"\nQuestion is: \n" + line);
+                //System.out.println("\n\nMatchFound!\nSCORE: " + score + "\nQuestion: "+itor+"\nQuestion is: \n" + line);
                 status.current_question = itor+1;
                 status.question_matched = itor;
                 status.success_status = true;
