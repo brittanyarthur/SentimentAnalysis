@@ -163,11 +163,12 @@ class findanswers{
       int start = iterator.first();
       double count = 0;
         //process each sentence
-      //for(int sentenceNum = 0; sentenceNum < processSentences.length; sentenceNum++){
+      
       for (int end = iterator.next(); end != BreakIterator.DONE; start = end, end = iterator.next()) {
             //look through the words in each sentence
         Queue<String> posFiveWordSpanQueue = new LinkedList<String>();
         String[] processWords = (response.substring(start,end)).split(" ");
+        int positive_word_count = 0;
         for(int wordIndex = 0; wordIndex < processWords.length; wordIndex++){
               /*maintain a queue of size 5 of positive words 
               everytime a new word is read in, we do three things:
@@ -178,28 +179,41 @@ class findanswers{
               if it is, then we check to see the size of the queue and add that
               number to the number of words that are in a 5 word left-distance from the option */
               String test = response.substring(start,end);
-              if(!posFiveWordSpanQueue.isEmpty() && posFiveWordSpanQueue.size() >= 5){
-                posFiveWordSpanQueue.remove();
+              if(!posFiveWordSpanQueue.isEmpty() && posFiveWordSpanQueue.size() > 5){
+                String pop = dict.getMatchingPrefix(posFiveWordSpanQueue.remove());
+                if(pop!=null && !pop.isEmpty()){
+                  --positive_word_count;
+                }
               }
+   
               String result = dict.getMatchingPrefix(processWords[wordIndex]);
               if(result != null && !result.isEmpty()){
-                posFiveWordSpanQueue.add(result);
-                //System.out.println("+++++++++++++EXISTS // START ++++++++");
-                //System.out.println("result was: " + result + " from input word: " + processWords[wordIndex]);
-                //System.out.println("+++++++++++++EXISTS // END++++++++");
+                ++positive_word_count;
+                System.out.println("+++++++++++++EXISTS // START ++++++++");
+                System.out.println("result was: " + result + " from input word: " + processWords[wordIndex]);
+                System.out.println("+++++++++++++EXISTS // with queue size = "+posFiveWordSpanQueue.size()+" END++++++++");
               }
 
               //find out which option this is
               String[] options = (Keywords.keywordmap[q_num]).split(" ");
+              String temp = "";
               for(int i = 0; i < options.length; i++){
                 if(processWords[wordIndex].equals(options[i])){
-                  int pos_count = posFiveWordSpanQueue.size();
+                  temp = options[i];
+                  //int pos_count = posFiveWordSpanQueue.size();
                   int option_index = getOptionIndex(options[i], op_info[q_num]);
                   //add to the positive score count for that number
-                  op_info[q_num].opInfo[option_index].pos_count = pos_count;
+                  
+
+                  op_info[q_num].opInfo[option_index].pos_count += positive_word_count;
                 }
               }
-
+              //insert into queue
+              posFiveWordSpanQueue.add(processWords[wordIndex]);
+              for(String s : posFiveWordSpanQueue) { 
+                    System.out.println("element: " + s.toString()); 
+               }
+               System.out.println("positive words in queue = "+positive_word_count+"\nfor word: "+temp+"\n\n");
             }
           }
         }
@@ -251,7 +265,7 @@ class findanswers{
          if(option_index == -1){
           System.out.println("ERROR GIVEN WITH INPUT: " + options[i]);
          }else{
-          op_info[q_num].opInfo[option_index].freq_count = freq;
+          op_info[q_num].opInfo[option_index].freq_count += freq;
          }
          answer += "\n<<" + options[i] + ">> frequency is: " + freq;
        }
