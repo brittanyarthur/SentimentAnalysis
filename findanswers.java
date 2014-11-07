@@ -15,7 +15,7 @@ class findanswers{
 
   public static class OpInfoArray{
     private OpInfoSet[] opInfo;
-    public OpInfoArray(int count){ //OpInfoSet set){
+    public OpInfoArray(int count){ 
   OpInfoSet[] op = new OpInfoSet[count];
   for (int i = 0; i < count; ++i) {
     op[i] = new OpInfoSet();
@@ -50,14 +50,14 @@ class findanswers{
     	 Keywords.keywordmap[1] = " "; //there are no options presented
 
     	//Do you prefer games where you are alone against other people or with others (on a team) against other people?
-      Keywords.keywordmap[2] = "alone others other team both";
+      Keywords.keywordmap[2] = "alone team teams both";
 
    		//When playing alone or as part  of a team, do you prefer to play against people who are better, the same, or worse than you?
       Keywords.keywordmap[3] = "better same worse equal both";
 
    		//Do you prefer direct competition - where you can influence the other person, strategize (like in chess), or indirect competition
    		//where you cannot influence them, it's primarily about luck (like in bingo, Yahtzee)?
-      Keywords.keywordmap[4] = "direct indirect luck both";
+      Keywords.keywordmap[4] = "direct influence indirect luck both strategize strategies strategy";
 
    		//Are there any circumstances related to video gaming under which competition against others is motivating to you?
    		Keywords.keywordmap[5] = " "; //options are not given
@@ -69,14 +69,14 @@ class findanswers{
       option_set[1].opInfo[0].optionID = "";
 
       option_set[2].opInfo[0].optionID = "alone";
-      option_set[2].opInfo[1].optionID = "others other team";
+      option_set[2].opInfo[1].optionID = "team teams";
       option_set[2].opInfo[2].optionID = "both";
 
       option_set[3].opInfo[0].optionID = "better";
       option_set[3].opInfo[1].optionID = "equal both same";
       option_set[3].opInfo[2].optionID = "worse";
 
-      option_set[4].opInfo[0].optionID = "direct";
+      option_set[4].opInfo[0].optionID = "strategize strategies strategy direct influence";
       option_set[4].opInfo[1].optionID = "indirect";
       option_set[4].opInfo[2].optionID = "luck";
       option_set[4].opInfo[3].optionID = "equal both";
@@ -140,14 +140,23 @@ class findanswers{
       GetPositiveCount(response, dict, q_num, op_info);
 
       //Print out results
+      int max = 0;
+      String max_opt = "";
       for(int k = 0; k < (op_info[q_num].opInfo).length; k++){
         System.out.println("========================================");
         System.out.println("Analysis for Question #"+q_num);
         System.out.println("Options are: " + op_info[q_num].opInfo[k].optionID);
         System.out.println("Frequency: " + op_info[q_num].opInfo[k].freq_count);
         System.out.println("Positive Words: " + op_info[q_num].opInfo[k].pos_count);
+        int score = op_info[q_num].opInfo[k].freq_count+(2*op_info[q_num].opInfo[k].pos_count);
+        if(score>max){
+          max = score;
+          max_opt = op_info[q_num].opInfo[k].optionID;
+        }
       }
-
+      //System.out.println("============================================================");
+      System.out.println("\n\n                  ====================    Selected Option: " + max_opt + " score: "+max+"    ====================\n\n\n\n");
+      //System.out.println("============================================================");
       return answer;
     }
 
@@ -169,7 +178,8 @@ class findanswers{
         Queue<String> posFiveWordSpanQueue = new LinkedList<String>();
         String[] processWords = (response.substring(start,end)).split(" ");
         int positive_word_count = 0;
-        for(int wordIndex = 0; wordIndex < processWords.length; wordIndex++){
+        boolean not_complete = true;
+        for(int wordIndex = 0; (wordIndex < processWords.length || not_complete); wordIndex++){
               /*maintain a queue of size 5 of positive words 
               everytime a new word is read in, we do three things:
               1. we remove 1 item from the bottom of the queue
@@ -178,59 +188,78 @@ class findanswers{
               3. we check to see if it is an option.
               if it is, then we check to see the size of the queue and add that
               number to the number of words that are in a 5 word left-distance from the option */
+              boolean tempBool = false;
               String test = response.substring(start,end);
-              if(!posFiveWordSpanQueue.isEmpty() && posFiveWordSpanQueue.size() > 5){
-                String pop = dict.getMatchingPrefix(posFiveWordSpanQueue.remove());
-                if(pop!=null && !pop.isEmpty()){
+              if(!posFiveWordSpanQueue.isEmpty() && (posFiveWordSpanQueue.size() > 5||wordIndex >= processWords.length)){
+                //checking for "look ahead" positive words as well
+                String pop = posFiveWordSpanQueue.remove();
+                String pop_pos_match = dict.getMatchingPrefix(pop);
+                UpdatePositiveScore(op_info, pop, positive_word_count, q_num);
+                //if we have poped off a positive word, then we will decrement the positive word count 
+                if(pop_pos_match!=null && !pop_pos_match.isEmpty()){
                   --positive_word_count;
                 }
+                if(posFiveWordSpanQueue.isEmpty()){
+                  not_complete = false;
+                  continue;
+                }
+                if(wordIndex >= processWords.length){
+                  continue;
+                }
               }
+              tempBool = false;
+
+              if(processWords[wordIndex]!=null && !processWords[wordIndex].isEmpty()){
+              for(String s : posFiveWordSpanQueue) { 
+                    //System.out.println("element: " + s.toString()); 
+               }
+               //System.out.println("positive words in queue = "+positive_word_count+"\nfor word (new element): "+processWords[wordIndex]+"\n\n");
+             }
+             //find out which option this is and increment positive count for that selected option
+              String temp = UpdatePositiveScore(op_info, processWords[wordIndex], positive_word_count, q_num);
    
+              //check to see if the word is a positive word
               String result = dict.getMatchingPrefix(processWords[wordIndex]);
               if(result != null && !result.isEmpty()){
                 ++positive_word_count;
-                System.out.println("+++++++++++++EXISTS // START ++++++++");
-                System.out.println("result was: " + result + " from input word: " + processWords[wordIndex]);
-                System.out.println("+++++++++++++EXISTS // with queue size = "+posFiveWordSpanQueue.size()+" END++++++++");
+                //System.out.println("+++++++++++++EXISTS // START ++++++++");
+                //System.out.println("result was: " + result + " from input word: " + processWords[wordIndex]);
+                //System.out.println("+++++++++++++EXISTS // with queue size = "+posFiveWordSpanQueue.size()+" END++++++++");
               }
+             //insert into queue
+              posFiveWordSpanQueue.add(processWords[wordIndex]);
+            }
+          }
+        }
 
-              //find out which option this is
-              String[] options = (Keywords.keywordmap[q_num]).split(" ");
+        public static String UpdatePositiveScore(OpInfoArray[] op_info, String candidate_word, int positive_word_count, int q_num){
+          String[] options = (Keywords.keywordmap[q_num]).split(" ");
               String temp = "";
               for(int i = 0; i < options.length; i++){
-                if(processWords[wordIndex].equals(options[i])){
+                if(candidate_word.equals(options[i])){
                   temp = options[i];
                   //int pos_count = posFiveWordSpanQueue.size();
-                  int option_index = getOptionIndex(options[i], op_info[q_num]);
+                  int option_index = GetOptionIndex(options[i], op_info[q_num]);
                   //add to the positive score count for that number
-                  
-
                   op_info[q_num].opInfo[option_index].pos_count += positive_word_count;
                 }
               }
-              //insert into queue
-              posFiveWordSpanQueue.add(processWords[wordIndex]);
-              for(String s : posFiveWordSpanQueue) { 
-                    System.out.println("element: " + s.toString()); 
-               }
-               System.out.println("positive words in queue = "+positive_word_count+"\nfor word: "+temp+"\n\n");
-            }
-          }
+              //this is just for debugging
+              return temp;
         }
 
-        public static int getOptionIndex(String option, OpInfoArray op_info){
+        public static int GetOptionIndex(String option, OpInfoArray op_info){
           for(int i = 0; i < (op_info.opInfo).length; i++){
            String optionID = (op_info.opInfo)[i].optionID;
-             //System.out.println(optionID + "\n\n");
            String[] optionIDList = optionID.split(" ");
            for(int k = 0; k < optionIDList.length; k++){
-            if(option.equals(optionIDList[k])){
-              return i;
+              if(option.equals(optionIDList[k])){
+                return i;
+              }
             }
           }
+          return -1;
         }
-        return -1;
-      }
 
       public static String GetFrequency(String keyword_options, String response, int q_num, OpInfoArray[] op_info){
         //the question number given maps to a listing of predicted subjects of the sentence for the response
@@ -261,7 +290,7 @@ class findanswers{
        //print out the results
        for(int i = 0; i < options.length; i++){
          int freq = word_frequency_table.get(options[i]);
-         int option_index = getOptionIndex(options[i], op_info[q_num]);
+         int option_index = GetOptionIndex(options[i], op_info[q_num]);
          if(option_index == -1){
           System.out.println("ERROR GIVEN WITH INPUT: " + options[i]);
          }else{
