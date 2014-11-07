@@ -9,8 +9,9 @@ class findanswers{
 		public static String[] keywordmap;
 	}
 
-  public class Globals{
+  public static class Globals{
     public static final int number_options = 6;
+    public static String test = "before";
   }
 
   public static class OpInfoArray{
@@ -105,11 +106,22 @@ class findanswers{
       return dict;
     }
 
+  public static void SetUp(){
+    Globals.test = "after";
+  }
+
      /* input: question number, a response to analyze
      output: the answer selected for that question
      logic: finds the frequency for that keyword along with the number of positive words nearby it
      */
   public static String OptionSelected(int q_num, String response){
+    System.out.println("@@@@@@@@@@@@@@");
+    System.out.println("@@@@@@@@@@@@@@");
+    System.out.println("@@@@@@@@@@@@@@");
+    System.out.println(Globals.test);
+    System.out.println("@@@@@@@@@@@@@@");
+    System.out.println("@@@@@@@@@@@@@@");
+    System.out.println("@@@@@@@@@@@@@@");
       FillMap();
       TrieTree.Trie dict = FillTrie();
       

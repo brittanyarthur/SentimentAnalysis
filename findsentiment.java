@@ -70,9 +70,14 @@ class findsentiment{
   public static void main (String[] args)
   {
      keyvalue[] keyword_question = setquestions();
+     findanswers.SetUp();
      //Globals.numberofquestions = 6;
-     try{
-        BufferedReader buffer = new BufferedReader(new FileReader(args[0]));
+     ProcessFile(args[0], keyword_question);
+  }
+
+  protected static void ProcessFile(String file, keyvalue[] keyword_question){
+    try{
+        BufferedReader buffer = new BufferedReader(new FileReader(file));
         String line;
         //for testing purposes, I will for now give as an argument a file which is the one to process.
         int starting_index = 0;
