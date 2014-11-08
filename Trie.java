@@ -1,5 +1,5 @@
 import java.util.HashMap;
-   
+    
 // Trie Node, which stores a character and the children in a HashMap
 class TrieNode {           
     public TrieNode(char ch)  {

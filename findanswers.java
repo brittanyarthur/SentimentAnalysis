@@ -4,28 +4,32 @@ import java.util.*;
 import java.text.BreakIterator;
 
 class findanswers{
-	public static class Keywords{
+	protected static class Keywords{
     //contains options for the sentence
 		public static String[] keywordmap;
 	}
 
-  public static class Globals{
+  protected static class Globals{
     public static final int number_options = 6;
     public static String test = "before";
   }
 
-  public static class OpInfoArray{
-    private OpInfoSet[] opInfo;
-    public OpInfoArray(int count){ 
-  OpInfoSet[] op = new OpInfoSet[count];
-  for (int i = 0; i < count; ++i) {
-    op[i] = new OpInfoSet();
+  protected static class ParentStorage{
+    public static OpInfoArray[] op_info;
   }
-      this.opInfo = op;//set;
+
+  protected static class OpInfoArray{
+    private OpInfoSet[] synonym_set;
+    public OpInfoArray(int count){ 
+    OpInfoSet[] op = new OpInfoSet[count];
+       for (int i = 0; i < count; ++i) {
+          op[i] = new OpInfoSet();
+       }
+      this.synonym_set = op;
     }
   }
 
-  public static class OpInfoSet{
+  protected static class OpInfoSet{
     private String optionID;
     private int freq_count;
     private int pos_count;
@@ -43,9 +47,9 @@ class findanswers{
 
  //The predicted subject of the sentence is known for each question.
   public static void FillMap(){
-		Keywords.keywordmap = new String[Globals.number_options]; //number of questions == 6
+		   Keywords.keywordmap = new String[Globals.number_options]; //number of questions == 6
 		   //Is competition an important part of why you like to play video games?
-   Keywords.keywordmap[0] = "competition";
+       Keywords.keywordmap[0] = "competition";
 
      	 //What is it about competition that is motivating?
     	 Keywords.keywordmap[1] = " "; //there are no options presented
@@ -62,30 +66,30 @@ class findanswers{
 
    		//Are there any circumstances related to video gaming under which competition against others is motivating to you?
    		Keywords.keywordmap[5] = " "; //options are not given
-     }
+  }
 
-     public static OpInfoArray[] InitializeOptionSets(OpInfoArray[] option_set){
-      option_set[0].opInfo[0].optionID = "competition";
+  public static OpInfoArray[] InitializeOptionSets(OpInfoArray[] option_set){
+      option_set[0].synonym_set[0].optionID = "competition";
       
-      option_set[1].opInfo[0].optionID = "";
+      option_set[1].synonym_set[0].optionID = "";
 
-      option_set[2].opInfo[0].optionID = "alone";
-      option_set[2].opInfo[1].optionID = "team teams";
-      option_set[2].opInfo[2].optionID = "both";
+      option_set[2].synonym_set[0].optionID = "alone";
+      option_set[2].synonym_set[1].optionID = "team teams";
+      option_set[2].synonym_set[2].optionID = "both";
 
-      option_set[3].opInfo[0].optionID = "better";
-      option_set[3].opInfo[1].optionID = "equal both same";
-      option_set[3].opInfo[2].optionID = "worse";
+      option_set[3].synonym_set[0].optionID = "better";
+      option_set[3].synonym_set[1].optionID = "equal both same";
+      option_set[3].synonym_set[2].optionID = "worse";
 
-      option_set[4].opInfo[0].optionID = "strategize strategies strategy direct influence";
-      option_set[4].opInfo[1].optionID = "indirect";
-      option_set[4].opInfo[2].optionID = "luck";
-      option_set[4].opInfo[3].optionID = "equal both";
+      option_set[4].synonym_set[0].optionID = "strategize strategies strategy direct influence";
+      option_set[4].synonym_set[1].optionID = "indirect";
+      option_set[4].synonym_set[2].optionID = "luck";
+      option_set[4].synonym_set[3].optionID = "equal both";
 
-      option_set[5].opInfo[0].optionID = "";
+      option_set[5].synonym_set[0].optionID = "";
 
       return option_set;
-    }
+  }
 
     public static TrieTree.Trie FillTrie(){
       TrieTree.Trie dict = new TrieTree.Trie(); 
@@ -107,22 +111,24 @@ class findanswers{
     }
 
   public static void SetUp(){
-    Globals.test = "after";
+    FillMap();
+
+    //Create a place where findings about frequency and positive counts can be stored
+      ParentStorage.op_info = new OpInfoArray[Globals.number_options];
+      ParentStorage.op_info[0] = new OpInfoArray(1);
+      ParentStorage.op_info[1] = new OpInfoArray(1);
+      ParentStorage.op_info[2] = new OpInfoArray(3);
+      ParentStorage.op_info[3] = new OpInfoArray(3);
+      ParentStorage.op_info[4] = new OpInfoArray(4);
+      ParentStorage.op_info[5] = new OpInfoArray(1);
+      ParentStorage.op_info = InitializeOptionSets(ParentStorage.op_info);
   }
 
      /* input: question number, a response to analyze
      output: the answer selected for that question
      logic: finds the frequency for that keyword along with the number of positive words nearby it
      */
-  public static String OptionSelected(int q_num, String response){
-    System.out.println("@@@@@@@@@@@@@@");
-    System.out.println("@@@@@@@@@@@@@@");
-    System.out.println("@@@@@@@@@@@@@@");
-    System.out.println(Globals.test);
-    System.out.println("@@@@@@@@@@@@@@");
-    System.out.println("@@@@@@@@@@@@@@");
-    System.out.println("@@@@@@@@@@@@@@");
-      FillMap();
+  public static String OptionSelected(int q_num, String response){ 
       TrieTree.Trie dict = FillTrie();
       
       String answer = "";
@@ -135,35 +141,25 @@ class findanswers{
         answer = "This question does not present options -> will not be analyzed this way";
       }
 
-      //Create a place where findings about frequency and positive counts can be stored
-      OpInfoArray[] op_info = new OpInfoArray[Globals.number_options];
-      op_info[0] = new OpInfoArray(1);
-      op_info[1] = new OpInfoArray(1);
-      op_info[2] = new OpInfoArray(3);
-      op_info[3] = new OpInfoArray(3);
-      op_info[4] = new OpInfoArray(4);
-      op_info[5] = new OpInfoArray(1);
-      op_info = InitializeOptionSets(op_info);
-
       //get the frequency of each keyword in the response
-      answer += GetFrequency(keyword_options, response, q_num, op_info);
+      answer += GetFrequency(keyword_options, response, q_num, ParentStorage.op_info);
       
       //find number of positive words per option
-      GetPositiveCount(response, dict, q_num, op_info);
+      GetPositiveCount(response, dict, q_num, ParentStorage.op_info);
 
       //Print out results
       int max = 0;
       String max_opt = "";
-      for(int k = 0; k < (op_info[q_num].opInfo).length; k++){
+      for(int k = 0; k < (ParentStorage.op_info[q_num].synonym_set).length; k++){
         System.out.println("========================================");
         System.out.println("Analysis for Question #"+q_num);
-        System.out.println("Options are: " + op_info[q_num].opInfo[k].optionID);
-        System.out.println("Frequency: " + op_info[q_num].opInfo[k].freq_count);
-        System.out.println("Positive Words: " + op_info[q_num].opInfo[k].pos_count);
-        int score = op_info[q_num].opInfo[k].freq_count+(2*op_info[q_num].opInfo[k].pos_count);
+        System.out.println("Options are: " + ParentStorage.op_info[q_num].synonym_set[k].optionID);
+        System.out.println("Frequency: " + ParentStorage.op_info[q_num].synonym_set[k].freq_count);
+        System.out.println("Positive Words: " + ParentStorage.op_info[q_num].synonym_set[k].pos_count);
+        int score = ParentStorage.op_info[q_num].synonym_set[k].freq_count+(2*ParentStorage.op_info[q_num].synonym_set[k].pos_count);
         if(score>max){
           max = score;
-          max_opt = op_info[q_num].opInfo[k].optionID;
+          max_opt = ParentStorage.op_info[q_num].synonym_set[k].optionID;
         }
       }
       //System.out.println("============================================================");
@@ -172,21 +168,17 @@ class findanswers{
       return answer;
     }
 
-  //to do: add into a directory positiveList
   //find the number of positive words 5 words away from option-words
     public static void GetPositiveCount(String response, TrieTree.Trie dict, int q_num, OpInfoArray[] op_info){
       //remove all non numeric
-      //response = response.replaceAll("[^\\.\\!a-zA-Z0-9\\s]", "");
-      //split on sentences
-      //String[] processSentences = response.split(".");
+      response = response.replaceAll("[^a-zA-Z0-9\\s]", "");
       BreakIterator iterator = BreakIterator.getSentenceInstance(Locale.US);
       iterator.setText(response);
       int start = iterator.first();
       double count = 0;
-        //process each sentence
-      
+
+      //process each sentence > look through the words in each sentence
       for (int end = iterator.next(); end != BreakIterator.DONE; start = end, end = iterator.next()) {
-            //look through the words in each sentence
         Queue<String> posFiveWordSpanQueue = new LinkedList<String>();
         String[] processWords = (response.substring(start,end)).split(" ");
         int positive_word_count = 0;
@@ -206,7 +198,7 @@ class findanswers{
                 //checking for "look ahead" positive words as well
                 String pop = posFiveWordSpanQueue.remove();
                 String pop_pos_match = dict.getMatchingPrefix(pop);
-                UpdatePositiveScore(op_info, pop, positive_word_count, q_num);
+                UpdatePositiveScore(pop, positive_word_count, q_num);
                 //if we have poped off a positive word, then we will decrement the positive word count 
                 if(pop_pos_match!=null && !pop_pos_match.isEmpty()){
                   --positive_word_count;
@@ -228,7 +220,7 @@ class findanswers{
                //System.out.println("positive words in queue = "+positive_word_count+"\nfor word (new element): "+processWords[wordIndex]+"\n\n");
              }
              //find out which option this is and increment positive count for that selected option
-              String temp = UpdatePositiveScore(op_info, processWords[wordIndex], positive_word_count, q_num);
+              String temp = UpdatePositiveScore(processWords[wordIndex], positive_word_count, q_num);
    
               //check to see if the word is a positive word
               String result = dict.getMatchingPrefix(processWords[wordIndex]);
@@ -244,16 +236,16 @@ class findanswers{
           }
         }
 
-        public static String UpdatePositiveScore(OpInfoArray[] op_info, String candidate_word, int positive_word_count, int q_num){
+        public static String UpdatePositiveScore(String candidate_word, int positive_word_count, int q_num){
           String[] options = (Keywords.keywordmap[q_num]).split(" ");
               String temp = "";
               for(int i = 0; i < options.length; i++){
                 if(candidate_word.equals(options[i])){
                   temp = options[i];
                   //int pos_count = posFiveWordSpanQueue.size();
-                  int option_index = GetOptionIndex(options[i], op_info[q_num]);
+                  int option_index = GetOptionIndex(options[i], ParentStorage.op_info[q_num]);
                   //add to the positive score count for that number
-                  op_info[q_num].opInfo[option_index].pos_count += positive_word_count;
+                  ParentStorage.op_info[q_num].synonym_set[option_index].pos_count += positive_word_count;
                 }
               }
               //this is just for debugging
@@ -261,8 +253,8 @@ class findanswers{
         }
 
         public static int GetOptionIndex(String option, OpInfoArray op_info){
-          for(int i = 0; i < (op_info.opInfo).length; i++){
-           String optionID = (op_info.opInfo)[i].optionID;
+          for(int i = 0; i < (op_info.synonym_set).length; i++){
+           String optionID = (op_info.synonym_set)[i].optionID;
            String[] optionIDList = optionID.split(" ");
            for(int k = 0; k < optionIDList.length; k++){
               if(option.equals(optionIDList[k])){
@@ -284,7 +276,6 @@ class findanswers{
         //put all the options in a hash table
         Hashtable<String, Integer> word_frequency_table = new Hashtable<String, Integer>();
         for(int i = 0; i < options.length; i++){
-           //op_info[q_num].optionID = options[itor];
          if(word_frequency_table.get(options[i])==null){
            word_frequency_table.put(options[i], 0);
          }
@@ -306,7 +297,7 @@ class findanswers{
          if(option_index == -1){
           System.out.println("ERROR GIVEN WITH INPUT: " + options[i]);
          }else{
-          op_info[q_num].opInfo[option_index].freq_count += freq;
+          op_info[q_num].synonym_set[option_index].freq_count += freq;
          }
          answer += "\n<<" + options[i] + ">> frequency is: " + freq;
        }

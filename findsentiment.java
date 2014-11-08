@@ -32,14 +32,74 @@ bag of words for the how positive
 aylien text analysis api
 
 call this a reinforcement learning 
+
+testing , life cycles , some uml
 */
+
+class SearchStatus{
+    private int current_question;
+    private int question_matched;
+    private boolean success_status;
+    private boolean finished;
+    private static SearchStatus searchobj; 
+
+    //a private constructor that prevents other classes from instantiating this object
+    private SearchStatus(int current_question, int question_matched, boolean success_status, boolean finished)
+    {
+        this.current_question = current_question;
+        this.question_matched = question_matched;
+        this.success_status = success_status;
+        this.finished = finished;
+    }
+
+    public static SearchStatus getSearchObject(int current_question, int question_matched, boolean success_status, boolean finished){
+      if(searchobj == null){
+        searchobj = new SearchStatus(current_question, question_matched, success_status, finished);
+      }
+      return searchobj;
+    }
+
+    //set values
+    public void set_currentQ(int current_question){
+      this.current_question = current_question;
+    }
+
+    public void set_matchedQ(int question_matched){
+      this.question_matched = question_matched;
+    }
+
+    public void set_successStatus(boolean success_status){
+      this.success_status = success_status;
+    }
+
+    public void set_finishedStatus(boolean finished){
+      this.finished = finished;
+    }
+
+    public int get_currentQ(){
+      return current_question;
+    }
+
+    public int get_matchedQ(){
+      return question_matched;
+    }
+
+    public boolean get_successStatus(){
+      return success_status;
+    }
+
+    public boolean get_finishedStatus(){
+      return finished;
+    }
+}
+
 class findsentiment{
 
-  public static class Globals{
+  private static class Globals{
     public static int numberofquestions = 6;
   }
 
-  public static class keyvalue
+  private static class keyvalue
   {
      private String keywords;
      private String fragments;
@@ -52,51 +112,36 @@ class findsentiment{
      }
   }
 
-  public static class searchstatus
-  {
-    private int current_question;
-    private int question_matched;
-    private boolean success_status;
-    private boolean finished;
-    public searchstatus(int current_question, int question_matched, boolean success_status, boolean finished)
-    {
-        this.current_question = current_question;
-        this.question_matched = question_matched;
-        this.success_status = success_status;
-        this.finished = finished;
-    }
-  }
-
   public static void main (String[] args)
   {
      keyvalue[] keyword_question = setquestions();
      findanswers.SetUp();
-     //Globals.numberofquestions = 6;
      ProcessFile(args[0], keyword_question);
   }
 
-  protected static void ProcessFile(String file, keyvalue[] keyword_question){
+/* File is read in line by line. Each line is sent into the function "rank". It will predict which 
+   question is being asked. 
+*/
+  protected static void ProcessFile(String filepath, keyvalue[] keyword_question){
     try{
-        BufferedReader buffer = new BufferedReader(new FileReader(file));
+        BufferedReader buffer = new BufferedReader(new FileReader(filepath));
         String line;
-        //for testing purposes, I will for now give as an argument a file which is the one to process.
         int starting_index = 0;
-        searchstatus status = new searchstatus(0,0,false,false);
+        SearchStatus status = SearchStatus.getSearchObject(0,0,false,false);
         String[] questions = fillNullArray(Globals.numberofquestions);
         String[] responses = fillNullArray(Globals.numberofquestions);
         while ((line = buffer.readLine()) != null) {       
            rank(line, starting_index, keyword_question, status);
-           //format
-           if(status.success_status == true)
+           if(status.get_successStatus() == true)
            {  
               line = line.replaceAll("\t","");
-              questions[status.question_matched] += ("\n" + line + "\n\n");
-              starting_index = status.current_question;
+              questions[status.get_matchedQ()] += ("\n" + line + "\n\n");
+              starting_index = status.get_currentQ();
            }else{
               if(line.contains("Speaker 2")){
                 line = line.replaceAll("Speaker 2:","");
                 line = line.replaceAll("\t","");
-                responses[status.question_matched] += (line + " ");
+                responses[status.get_matchedQ()] += (line + " ");
               }
            }
         }
@@ -123,16 +168,13 @@ class findsentiment{
         System.out.printf("%10s %20s \n", "*** RESPONSE: ",responses[question_num]);
        findmeaning(responses, question_num, keyword_question);
        String answer = findanswers.OptionSelected(question_num,responses[question_num]);
-      //System.out.printf("*** ANSWER: %20s \n\n", answer);
      }
   }
 
-  //starting very basics
   //next goal today is to make a design for how I will analyze the meaning
   protected static void findmeaning(String[] response, int question_num, keyvalue[] keyword_question)
   {
-      //search for keywords
-      //if a keyword is found, then look back 5 words to find positive words
+      //search for keywords: if a keyword is found, then look back 5 words to find positive words
       BreakIterator iterator = BreakIterator.getSentenceInstance(Locale.US);
       iterator.setText(response[question_num]);
       int start = iterator.first();
@@ -148,7 +190,6 @@ class findsentiment{
             curr_sentence = curr_sentence.toLowerCase();
             if(curr_sentence.contains(keywords[match]) && !printedyet)
             {
-               //System.out.println("***************************************For Analysis***************************************\n"+response[question_num].substring(start,end));
                printedyet = true;
             }
             if(question_num==0 && !printedyet_special_case && (curr_sentence.contains("yes")||curr_sentence.contains("yeah")||curr_sentence.contains("no")))
@@ -169,12 +210,14 @@ class findsentiment{
     return array;
   }
 
-  //the problem right now is that recovering is bad from a misplaced question. 
-  //perhaps it is best to always start from 0 not staring_index??
-  protected static void rank(String line, int starting_index, keyvalue[] keyword_question, searchstatus status)
+  /* The line will be searched for keywords relating to questions that have not been asked yet. 
+     The first question that is found that reaches a score of atleast 4 will be considered to be the question
+     and the funtion will return. On subsequent call, the starting question to be considered will be 1 greater.
+  */
+  protected static void rank(String line, int starting_index, keyvalue[] keyword_question, SearchStatus status)
   {
       if(starting_index>keyword_question.length || line.contains("Speaker 2")){
-        status.success_status = false;
+        status.set_successStatus(false);
         return;
       } 
       int score = 0;
@@ -211,14 +254,14 @@ class findsentiment{
            */
             if(score>3){
                 //System.out.println("\n\nMatchFound!\nSCORE: " + score + "\nQuestion: "+itor+"\nQuestion is: \n" + line);
-                status.current_question = itor_questionnum+1;
-                status.question_matched = itor_questionnum;
-                status.success_status = true;
+                status.set_currentQ(itor_questionnum+1);
+                status.set_matchedQ(itor_questionnum);
+                status.set_successStatus(true);
                 return;
             }
       }
       //if the loop exits without breaking, then all questions have been considered and none matched
-      status.success_status = false;
+      status.set_successStatus(false);
   }
   
   //todo: look at 1 question to see what # of each category is matched. do this 6 times to make a point system.
@@ -238,7 +281,6 @@ class findsentiment{
      //Do you prefer games where you are alone against other people or with others (on a team) against other people?
      keyvalue general_keywords2 = new keyvalue("prefer alone against others other team", "prefer games% alone against% against other people% with others against","worse");
      keyword_question[2] = general_keywords2;
-
      
      //When playing alone or as part  of a team, do you prefer to play against people who are better, the same, or worse than you?
      keyvalue general_keywords3 = new keyvalue("prefer better same worse equal", "playing alone or% play against% do you prefer to% better, the same% better, same% same, or worse% same, worse% than you","");
