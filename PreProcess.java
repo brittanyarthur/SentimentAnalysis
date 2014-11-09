@@ -40,10 +40,12 @@ class PreProcess{
                      newresponse += response_words[k] + " ";
             	}
             }
-            System.out.println("REPONSE WAS: "); 
-            printCmdLineFormat(response);
-            System.out.println("NEW RESPONSE IS: "); 
-            printCmdLineFormat(newresponse);
+            if(findsentiment.Globals.cmd_options.contains("l")){
+                 System.out.println("REPONSE WAS: "); 
+                 printCmdLineFormat(response);
+                 System.out.println("NEW RESPONSE IS: "); 
+                 printCmdLineFormat(newresponse);
+            }
             return newresponse.trim();
         } catch (IOException error) {
         	System.out.println("error occured reading in file.");
@@ -57,6 +59,7 @@ class PreProcess{
       int end = size;
       int difference = 0;
       String newstr = "";
+      input = input.replaceAll("\n","");
       while(end < input.length()){
            difference = getEndIndex(input, start, end);
            newstr += input.substring(start,end-difference) + "\n";
@@ -78,6 +81,13 @@ class PreProcess{
            --new_end;
        }
        return difference;//(curr_end==0)?0:
+  }
+
+  //process options
+  public static void print(String option, String cmd_options, String message){
+     if(cmd_options.contains(option)){
+        System.out.println(message);
+     }
   }
 
 } 

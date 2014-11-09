@@ -11,7 +11,7 @@ class findanswers{
 
   protected static class Globals{
     public static final int number_options = 6;
-    public static String test = "before";
+    public static String cmd_options = "";
   }
 
   protected static class ParentStorage{
@@ -111,9 +111,10 @@ class findanswers{
     }
 
   public static void SetUp(String cmd_options){
-    FillMap();
+      FillMap();
+      Globals.cmd_options = cmd_options;
 
-    //Create a place where findings about frequency and positive counts can be stored
+      //Create a place where findings about frequency and positive counts can be stored
       ParentStorage.op_info = new OpInfoArray[Globals.number_options];
       ParentStorage.op_info[0] = new OpInfoArray(1);
       ParentStorage.op_info[1] = new OpInfoArray(1);
@@ -151,18 +152,23 @@ class findanswers{
       int max = 0;
       String max_opt = "";
       for(int k = 0; k < (ParentStorage.op_info[q_num].synonym_set).length; k++){
-        System.out.println("========================================");
-        System.out.println("Analysis for Question #"+q_num);
-        System.out.println("Options are: " + ParentStorage.op_info[q_num].synonym_set[k].optionID);
-        System.out.println("Frequency: " + ParentStorage.op_info[q_num].synonym_set[k].freq_count);
-        System.out.println("Positive Words: " + ParentStorage.op_info[q_num].synonym_set[k].pos_count);
+        PreProcess.print("a",Globals.cmd_options, "========================================");
+        PreProcess.print("a",Globals.cmd_options, "Analysis for Question #"+q_num);
+        PreProcess.print("a",Globals.cmd_options, "Options are: " + ParentStorage.op_info[q_num].synonym_set[k].optionID);
+        PreProcess.print("a",Globals.cmd_options, "Frequency: " + ParentStorage.op_info[q_num].synonym_set[k].freq_count);
+        PreProcess.print("a",Globals.cmd_options, "Positive Words: " + ParentStorage.op_info[q_num].synonym_set[k].pos_count);
+       
         int score = ParentStorage.op_info[q_num].synonym_set[k].freq_count+(2*ParentStorage.op_info[q_num].synonym_set[k].pos_count);
         if(score>max){
           max = score;
           max_opt = ParentStorage.op_info[q_num].synonym_set[k].optionID;
         }
       }
-      System.out.println("\n\n                  ====================    Selected Option: " + max_opt + " score: "+max+"    ====================\n\n\n\n");
+      String score_info = "";
+      if(Globals.cmd_options.contains("a")){
+          score_info = " SCORE: "+max;
+      }
+      PreProcess.print("",Globals.cmd_options,"\n\n====================    SELECTED OPTION: " + max_opt + score_info +"    ====================\n\n\n\n");
       return answer;
     }
 
@@ -303,28 +309,6 @@ class findanswers{
      }
 
    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -95,7 +95,7 @@ class SearchStatus{
 
 class findsentiment{
 
-  private static class Globals{
+  public static class Globals{
     public static int numberofquestions = 6;
     public static String cmd_options = "";
   }
@@ -168,10 +168,11 @@ class findsentiment{
                continue;
        }
        //Index 2 is for question 2 and contains responses to q2 and so on...
-       System.out.println("------------------------------------------------------------------------------------------------");
-       System.out.println("-----------------------------------------Question #"+question_num+"-----------------------------------------");
-       System.out.println("--------------------------------------------------------------------------------------------\n");
-       System.out.printf("%10s %20s \n\n", "*** QUESTION:", questions[question_num]);
+       System.out.println("---------------------------------------------------------------------------------------");
+       System.out.println("-----------------------------------------Question #"+question_num+"-----------------------------------");
+       System.out.println("---------------------------------------------------------------------------------------\n");
+       System.out.printf("%-10s \n", "*** QUESTION:");
+       PreProcess.printCmdLineFormat(questions[question_num]);
        System.out.printf("%-10s\n", "*** RESPONSE ");
        PreProcess.printCmdLineFormat(responses[question_num]);
        findmeaning(responses, question_num, keyword_question);
