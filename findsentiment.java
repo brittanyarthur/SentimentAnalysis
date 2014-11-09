@@ -159,23 +159,22 @@ class findsentiment{
      }
   }
 
-  //All of the analysis of answers starts here
+  //All of the printing and analysis of answers starts here
   protected static void printResponses(String[] responses, String[] questions, keyvalue[] keyword_question)
   {
-     for(int question_num = 0; question_num < responses.length; question_num++)
-     {
-       if(responses[question_num]=="\n"){
-          continue;
+       for(int question_num = 0; question_num < responses.length; question_num++)
+       {
+           if(responses[question_num]=="\n"){
+               continue;
        }
        //Index 2 is for question 2 and contains responses to q2 and so on...
-       System.out.println("------------------------------------------------------------------------------------------------------------");
+       System.out.println("------------------------------------------------------------------------------------------------");
        System.out.println("-----------------------------------------Question #"+question_num+"-----------------------------------------");
        System.out.println("--------------------------------------------------------------------------------------------\n");
-        System.out.printf("%10s %20s \n\n", "*** QUESTION:", questions[question_num]);
-        System.out.printf("%10s %20s \n", "*** RESPONSE: ",responses[question_num]);
+       System.out.printf("%10s %20s \n\n", "*** QUESTION:", questions[question_num]);
+       System.out.printf("%-10s\n", "*** RESPONSE ");
+       PreProcess.printCmdLineFormat(responses[question_num]);
        findmeaning(responses, question_num, keyword_question);
-       responses[question_num] = responses[question_num].toLowerCase();
-       responses[question_num] = responses[question_num].replaceAll("[^a-zA-Z0-9\\s]", "");
        responses[question_num] = PreProcess.Begin(responses[question_num]);
        String answer = findanswers.OptionSelected(question_num,responses[question_num]);
      }

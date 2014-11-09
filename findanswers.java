@@ -162,9 +162,7 @@ class findanswers{
           max_opt = ParentStorage.op_info[q_num].synonym_set[k].optionID;
         }
       }
-      //System.out.println("============================================================");
       System.out.println("\n\n                  ====================    Selected Option: " + max_opt + " score: "+max+"    ====================\n\n\n\n");
-      //System.out.println("============================================================");
       return answer;
     }
 

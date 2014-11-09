@@ -5,6 +5,8 @@ import java.util.*;
 
 class PreProcess{
 	public static String Begin(String response){
+        response = response.toLowerCase();
+        response = response.replaceAll("[^a-zA-Z0-9\\s]", "");
         response = RemoveLike(response);
 		return response;
 	}
@@ -38,14 +40,46 @@ class PreProcess{
                      newresponse += response_words[k] + " ";
             	}
             }
-            System.out.println("response was: " + response);
-            System.out.println("new response is: " + newresponse);
+            System.out.println("REPONSE WAS: "); 
+            printCmdLineFormat(response);
+            System.out.println("NEW RESPONSE IS: "); 
+            printCmdLineFormat(newresponse);
             return newresponse.trim();
         } catch (IOException error) {
         	System.out.println("error occured reading in file.");
         }
         return response;
     }
+
+   public static void printCmdLineFormat(String input){
+      int size = 50; //size of line
+      int start = 0;
+      int end = size;
+      int difference = 0;
+      String newstr = "";
+      while(end < input.length()){
+           difference = getEndIndex(input, start, end);
+           newstr += input.substring(start,end-difference) + "\n";
+           System.out.printf("%25s|%-50s\n","",input.substring(start,end-difference));
+           start += size - difference;
+           end += size - difference;
+      }
+      System.out.printf("%25s|%-50s\n","",input.substring(start, input.length()));
+  }
+  
+ protected static int getEndIndex(String input, int start, int end){
+       char whitespace = 'X';
+       int difference = 0;
+       int new_end = input.substring(start,end).length()-1;
+       
+       while(whitespace != ' ' && new_end > 0){
+           whitespace = (input.substring(start,end)).charAt(new_end);
+           ++difference;
+           --new_end;
+       }
+       return difference;//(curr_end==0)?0:
+  }
+
 } 
 
 
