@@ -3,38 +3,6 @@ import java.io.*;
 import java.util.*;
 import java.text.BreakIterator;
 
-class OptionInformation{
-     private OpInfoArray[] op_info;
-
-     private class OpInfoArray{
-         private OpInfoSet[] synonym_set;
-         public OpInfoArray(int count){ 
-         OpInfoSet[] op = new OpInfoSet[count];
-         for (int i = 0; i < count; ++i) {
-             op[i] = new OpInfoSet();
-         }
-         this.synonym_set = op;
-     }
-
-     protected static class OpInfoSet{
-        private String optionID;
-        private int freq_count;
-        private int pos_count;
-        public OpInfoSet(int freq_count, int pos_count, String optionID){
-           this.optionID = optionID;
-           this.freq_count = freq_count;
-           this.pos_count = pos_count;
-        }
-        public OpInfoSet(){
-           this.optionID =  ""; //optionID;
-           this.freq_count = 0; //freq_count;
-           this.pos_count =  0; //pos_count;
-        }
-     }
-
-     
-}
-
 class findanswers{
 	protected static class Keywords{
     //contains options for the sentence
@@ -143,30 +111,29 @@ class findanswers{
     }
 
   public static void SetUp(){
-    FillMap();
-
-    //Create a place where findings about frequency and positive counts can be stored
-      ParentStorage.op_info = new OpInfoArray[Globals.number_options];
-      ParentStorage.op_info[0] = new OpInfoArray(1);
-      ParentStorage.op_info[1] = new OpInfoArray(1);
-      ParentStorage.op_info[2] = new OpInfoArray(3);
-      ParentStorage.op_info[3] = new OpInfoArray(3);
-      ParentStorage.op_info[4] = new OpInfoArray(4);
-      ParentStorage.op_info[5] = new OpInfoArray(1);
-      ParentStorage.op_info = InitializeOptionSets(ParentStorage.op_info);
+       FillMap();
+ 
+       ParentStorage.op_info = new OpInfoArray[Globals.number_options];
+       ParentStorage.op_info[0] = new OpInfoArray(1);
+       ParentStorage.op_info[1] = new OpInfoArray(1);
+       ParentStorage.op_info[2] = new OpInfoArray(3);
+       ParentStorage.op_info[3] = new OpInfoArray(3);
+       ParentStorage.op_info[4] = new OpInfoArray(4);
+       ParentStorage.op_info[5] = new OpInfoArray(1);
+       ParentStorage.op_info = InitializeOptionSets(ParentStorage.op_info);
   }
 
   /* input: question number, a response to analyze
      output: the answer selected for that question
      logic: finds the frequency for that keyword along with the number of positive words nearby it */
      public static String[] OptionSelected(int response_count, String[] responses){ 
+         SetUp();
          TrieTree.Trie dict = FillTrie();
          String answer = "";
       
          String[] predicted_answers = new String[response_count];
          predicted_answers[0] = "See special case response in addition.";
          for(int resp_num = 0; resp_num < response_count; resp_num++){
-
              String keyword_options = Keywords.keywordmap[resp_num];
              //if no options are present
              if(keyword_options==""){
@@ -175,7 +142,7 @@ class findanswers{
              }
   
              //preprocess the response to strip out fillers
-             responses[resp_num] = PreProcess.Begin(responses[resp_num]);
+             //responses[resp_num] = PreProcess.Begin(responses[resp_num]);
 
              //get frequency of each keyword in the response given for a particular question
              predicted_answers[resp_num] += GetFrequency(keyword_options, responses[resp_num], resp_num, ParentStorage.op_info);
@@ -189,10 +156,10 @@ class findanswers{
              for(int k = 0; k < (ParentStorage.op_info[resp_num].synonym_set).length; k++){
                  System.out.println("========================================");
                  System.out.println("Analysis for Question #"+resp_num);
-                 System.out.println("Options are: " + ParentStorage.op_info[resp_num].synonym_set[k].optionID);
-                 System.out.println("Frequency: " + ParentStorage.op_info[resp_num].synonym_set[k].freq_count);
-                 System.out.println("Positive Words: " + ParentStorage.op_info[resp_num].synonym_set[k].pos_count);
-                 int score = ParentStorage.op_info[resp_num].synonym_set[k].freq_count+(2*ParentStorage.op_info[resp_num].synonym_set[k].pos_count);
+                 System.out.println("Options are: " + (ParentStorage.op_info[resp_num]).synonym_set[k].optionID);
+                 System.out.println("Frequency: " + (ParentStorage.op_info[resp_num]).synonym_set[k].freq_count);
+                 System.out.println("Positive Words: " + (ParentStorage.op_info[resp_num]).synonym_set[k].pos_count);
+                 int score = (ParentStorage.op_info[resp_num]).synonym_set[k].freq_count+(2*ParentStorage.op_info[resp_num].synonym_set[k].pos_count);
                  if(score>max){
                      max = score;
                      max_opt = ParentStorage.op_info[resp_num].synonym_set[k].optionID;
@@ -202,8 +169,6 @@ class findanswers{
          }
       return predicted_answers;
     }
-
-    private static 
 
   //find the number of positive words 5 words away from option-words
     public static void GetPositiveCount(String response, TrieTree.Trie dict, int q_num, OpInfoArray[] op_info){
