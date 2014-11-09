@@ -120,8 +120,7 @@ class findsentiment{
   }
 
 /* File is read in line by line. Each line is sent into the function "rank". It will predict which 
-   question is being asked. 
-*/
+   question is being asked. */
   protected static void ProcessFile(String filepath, keyvalue[] keyword_question){
     try{
         BufferedReader buffer = new BufferedReader(new FileReader(filepath));
@@ -155,6 +154,7 @@ class findsentiment{
   //All of the analysis of answers starts here
   protected static void printResponses(String[] responses, String[] questions, keyvalue[] keyword_question)
   {
+     findanswers.OptionSelected(responses.length, responses);
      for(int question_num = 0; question_num < responses.length; question_num++)
      {
        if(responses[question_num]=="\n"){
@@ -167,10 +167,11 @@ class findsentiment{
         System.out.printf("%10s %20s \n\n", "*** QUESTION:", questions[question_num]);
         System.out.printf("%10s %20s \n", "*** RESPONSE: ",responses[question_num]);
        findmeaning(responses, question_num, keyword_question);
-       String answer = findanswers.OptionSelected(question_num,responses[question_num]);
+  
      }
   }
-
+ 
+  //FIX THIS !!! 
   //next goal today is to make a design for how I will analyze the meaning
   protected static void findmeaning(String[] response, int question_num, keyvalue[] keyword_question)
   {

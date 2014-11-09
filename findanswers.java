@@ -1,7 +1,39 @@
-import java.lang.*;
+import java.lang.*; 
 import java.io.*;
 import java.util.*;
 import java.text.BreakIterator;
+
+class OptionInformation{
+     private OpInfoArray[] op_info;
+
+     private class OpInfoArray{
+         private OpInfoSet[] synonym_set;
+         public OpInfoArray(int count){ 
+         OpInfoSet[] op = new OpInfoSet[count];
+         for (int i = 0; i < count; ++i) {
+             op[i] = new OpInfoSet();
+         }
+         this.synonym_set = op;
+     }
+
+     protected static class OpInfoSet{
+        private String optionID;
+        private int freq_count;
+        private int pos_count;
+        public OpInfoSet(int freq_count, int pos_count, String optionID){
+           this.optionID = optionID;
+           this.freq_count = freq_count;
+           this.pos_count = pos_count;
+        }
+        public OpInfoSet(){
+           this.optionID =  ""; //optionID;
+           this.freq_count = 0; //freq_count;
+           this.pos_count =  0; //pos_count;
+        }
+     }
+
+     
+}
 
 class findanswers{
 	protected static class Keywords{
@@ -124,49 +156,54 @@ class findanswers{
       ParentStorage.op_info = InitializeOptionSets(ParentStorage.op_info);
   }
 
-     /* input: question number, a response to analyze
+  /* input: question number, a response to analyze
      output: the answer selected for that question
-     logic: finds the frequency for that keyword along with the number of positive words nearby it
-     */
-  public static String OptionSelected(int q_num, String response){ 
-      TrieTree.Trie dict = FillTrie();
+     logic: finds the frequency for that keyword along with the number of positive words nearby it */
+     public static String[] OptionSelected(int response_count, String[] responses){ 
+         TrieTree.Trie dict = FillTrie();
+         String answer = "";
       
-      String answer = "";
-      String keyword_options = Keywords.keywordmap[q_num];
-      
-      if(q_num==0){
-        answer += "See special case response in addition.";
-      }
-      if(keyword_options==""){
-        answer = "This question does not present options -> will not be analyzed this way";
-      }
+         String[] predicted_answers = new String[response_count];
+         predicted_answers[0] = "See special case response in addition.";
+         for(int resp_num = 0; resp_num < response_count; resp_num++){
 
-      //get the frequency of each keyword in the response
-      answer += GetFrequency(keyword_options, response, q_num, ParentStorage.op_info);
-      
-      //find number of positive words per option
-      GetPositiveCount(response, dict, q_num, ParentStorage.op_info);
+             String keyword_options = Keywords.keywordmap[resp_num];
+             //if no options are present
+             if(keyword_options==""){
+                 predicted_answers[resp_num] = "This question does not present options -> will not be analyzed this way";
+                 continue;
+             }
+  
+             //preprocess the response to strip out fillers
+             responses[resp_num] = PreProcess.Begin(responses[resp_num]);
 
-      //Print out results
-      int max = 0;
-      String max_opt = "";
-      for(int k = 0; k < (ParentStorage.op_info[q_num].synonym_set).length; k++){
-        System.out.println("========================================");
-        System.out.println("Analysis for Question #"+q_num);
-        System.out.println("Options are: " + ParentStorage.op_info[q_num].synonym_set[k].optionID);
-        System.out.println("Frequency: " + ParentStorage.op_info[q_num].synonym_set[k].freq_count);
-        System.out.println("Positive Words: " + ParentStorage.op_info[q_num].synonym_set[k].pos_count);
-        int score = ParentStorage.op_info[q_num].synonym_set[k].freq_count+(2*ParentStorage.op_info[q_num].synonym_set[k].pos_count);
-        if(score>max){
-          max = score;
-          max_opt = ParentStorage.op_info[q_num].synonym_set[k].optionID;
-        }
-      }
-      //System.out.println("============================================================");
-      System.out.println("\n\n                  ====================    Selected Option: " + max_opt + " score: "+max+"    ====================\n\n\n\n");
-      //System.out.println("============================================================");
-      return answer;
+             //get frequency of each keyword in the response given for a particular question
+             predicted_answers[resp_num] += GetFrequency(keyword_options, responses[resp_num], resp_num, ParentStorage.op_info);
+
+             //get # positive words per option in the response given for a particular question
+             GetPositiveCount(responses[resp_num], dict, resp_num, ParentStorage.op_info);
+
+             //store results
+             int max = 0;
+             String max_opt = "";
+             for(int k = 0; k < (ParentStorage.op_info[resp_num].synonym_set).length; k++){
+                 System.out.println("========================================");
+                 System.out.println("Analysis for Question #"+resp_num);
+                 System.out.println("Options are: " + ParentStorage.op_info[resp_num].synonym_set[k].optionID);
+                 System.out.println("Frequency: " + ParentStorage.op_info[resp_num].synonym_set[k].freq_count);
+                 System.out.println("Positive Words: " + ParentStorage.op_info[resp_num].synonym_set[k].pos_count);
+                 int score = ParentStorage.op_info[resp_num].synonym_set[k].freq_count+(2*ParentStorage.op_info[resp_num].synonym_set[k].pos_count);
+                 if(score>max){
+                     max = score;
+                     max_opt = ParentStorage.op_info[resp_num].synonym_set[k].optionID;
+                 }
+             }
+             System.out.println("\n\n                  ====================    Selected Option: " + max_opt + " score: "+max+"    ====================\n\n\n\n");
+         }
+      return predicted_answers;
     }
+
+    private static 
 
   //find the number of positive words 5 words away from option-words
     public static void GetPositiveCount(String response, TrieTree.Trie dict, int q_num, OpInfoArray[] op_info){
