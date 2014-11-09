@@ -97,6 +97,7 @@ class findsentiment{
 
   private static class Globals{
     public static int numberofquestions = 6;
+    public static String cmd_options = "";
   }
 
   private static class keyvalue
@@ -114,9 +115,15 @@ class findsentiment{
 
   public static void main (String[] args)
   {
+     String filename = args[0]; //default 
+     Globals.cmd_options = "";
+     if(args.length == 2){
+         Globals.cmd_options = args[0];
+         filename = args[1];
+     }
      keyvalue[] keyword_question = setquestions();
-     findanswers.SetUp();
-     ProcessFile(args[0], keyword_question);
+     findanswers.SetUp(Globals.cmd_options);
+     ProcessFile(filename, keyword_question);
   }
 
 /* File is read in line by line. Each line is sent into the function "rank". It will predict which 
@@ -167,6 +174,9 @@ class findsentiment{
         System.out.printf("%10s %20s \n\n", "*** QUESTION:", questions[question_num]);
         System.out.printf("%10s %20s \n", "*** RESPONSE: ",responses[question_num]);
        findmeaning(responses, question_num, keyword_question);
+       responses[question_num] = responses[question_num].toLowerCase();
+       responses[question_num] = responses[question_num].replaceAll("[^a-zA-Z0-9\\s]", "");
+       responses[question_num] = PreProcess.Begin(responses[question_num]);
        String answer = findanswers.OptionSelected(question_num,responses[question_num]);
      }
   }

@@ -110,7 +110,7 @@ class findanswers{
       return dict;
     }
 
-  public static void SetUp(){
+  public static void SetUp(String cmd_options){
     FillMap();
 
     //Create a place where findings about frequency and positive counts can be stored
