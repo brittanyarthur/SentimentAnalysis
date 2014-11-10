@@ -12,25 +12,8 @@ Example (using fake data)
 -------------------------
 |    | Result
 |-------------|--------
-|*** QUESTION |
-|                          Speaker 1: Do you prefer direct competition -     
-|                          where you can influence the other person,        
-|                          strategize (like in chess), OR indirect          
-|                          competition - where you cannot influence them,   
-|                          it's primarily about luck (like in bingo,        
-|                          Yahtzee)?                                        
-|*** RESPONSE |
-|                          All kinds of tile based games are fun, they are  
-|                          challenging and make me think. But, hm, I'm not  
-|                          sure.. let me think.. I also like the game Sorry 
-|                          sometimes, but like, it's about luck and it's    
-|                          very fun but that is the only one I can think    
-|                          of. Overall, I don't like very much luck though. 
-|                          It can get kindof like, boring, with just like   
-|                          luck..you know? But I've enjoyed all the         
-|                          strategy games I've played, so yeah direct.      
-|
-|
+|*** QUESTION | Speaker 1: Do you prefer direct competition where you can influence the other person, strategize (like in chess), OR indirect competition - where you cannot influence them, it's primarily about luck (like in bingo, Yahtzee)?                                    
+|*** RESPONSE | All kinds of tile based games are fun, they are challenging and make me think. But, hm, I'm not sure.. let me think.. I also like the game Sorry sometimes, but like, it's about luck and it's very fun but that is the only one I can think of. Overall, I don't like very much luck though. It can get kindof like, boring, with just like luck..you know? But I've enjoyed all the strategy games I've played, so yeah direct. 
 |PREDICTED SELECTED OPTION | strategize strategies strategy skill direct influence 
 
 Options
@@ -50,7 +33,7 @@ Further Preprocessing:
 * 'didn’t' is replaced with 'did not'
 * 'not like' is replaced with 'notlike'
 
-Handling the word “not”
+1 Handling the word “not”
 -----------------------
 When the word “not” is encountered, we want to know what the respondent meant to apply it to. The Stanford Tagger labels each part of the sentence preceding “not”. It will look through words that fall into “linker” categories, as I call them, until it finds a word that is /not/ a “connector”. A word is a “connector” if its part of speech is used to express a relationship between two other words. 
 
@@ -59,19 +42,21 @@ Not will be applied to words coming after it - nouns and adjectives.
 '<not> <connectors> <adjective or noun>'
 
 Connectors parts of speech: IN, VB, VBD, VBG, VBN, VBP, VBZ, DT, RB, RBR, RBS, TO
+
 See part of speech labels here: http://stackoverflow.com/questions/1833252/java-stanford-nlp-part-of-speech-labels
 
-|Examples using the test file:|
+Example: 
 
-Input: '“Not any of the teams.”'
-I want to know: not /what/? One of the functions predicts what this /not/ is by using some functionality
-from the Stanford parser and from LIWC.
-Output: '"Not any of the NOTteams."'
+| Input | Output
+|-------|-------
+|“Not any of the teams.” | "Not any of the NOTteams."
+
+I want to know: not *what?* Not is a modifier upon an object. This object is found by using some functionality from the Stanford parser and from LIWC. 
 
 * See question 2 for good example analysis of the “like” cases and “not” cases.
 
 
-Handling the word “like”
+2 Handling the word “like”
 ------------------------
 
 See question 3 for analysis of the “like”. 
