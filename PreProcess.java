@@ -66,7 +66,7 @@ class PreProcess{
             String curr_sentence = response.substring(start,end).toLowerCase();
             curr_sentence = curr_sentence.replaceAll("[.,']", "");
             if(curr_sentence.contains("not ")){
-curr_sentence = curr_sentence.trim();
+                  curr_sentence = curr_sentence.trim();
                   String tagged_sentence = parsetext.Tag(curr_sentence);
                   String[] tagged_words = tagged_sentence.split(" ");
                   String[] untagged_words = curr_sentence.split(" ");
@@ -82,11 +82,10 @@ curr_sentence = curr_sentence.trim();
                                    i = k;
                                    String[] word_tag = tagged_words[k].split("/");
                                   if(Connectors.parts.contains(word_tag[1].trim())){
-                                       newresponse += word_tag[0] + " ";
+                                       newresponse += untagged_words[i] + " ";
                                    }else{
                                        //prepend not to this word, it is the predicted subject
-                                       newresponse += "NOT"+ word_tag[0] + " ";
-                                       ++i;
+                                       newresponse += "NOT"+ untagged_words[i] + " ";
                                        break;
                                    }
                                }
