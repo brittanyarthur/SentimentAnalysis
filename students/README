@@ -1,9 +1,0 @@
-Finds the most beneficial pairing of students in a group, represented by letters. 
-Each pair has a score representing the max benefit from a learning exchange. 
-
-Sample Output:
-
-////////$ java Pair
-
-Max score is: 18
-Student set is: AD BF CE 
