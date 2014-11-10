@@ -10,19 +10,16 @@ will predict which option the respondent chose.
 
 Example (using fake data)
 -------------------------
-
-|---------------------------------------------------------------------------------------
-|-----------------------------------------Question #4-----------------------------------
-|---------------------------------------------------------------------------------------
-|
-|*** QUESTION 
+|    | Result
+|-------------|--------
+|*** QUESTION |
 |                          Speaker 1: Do you prefer direct competition -     
 |                          where you can influence the other person,        
 |                          strategize (like in chess), OR indirect          
 |                          competition - where you cannot influence them,   
 |                          it's primarily about luck (like in bingo,        
 |                          Yahtzee)?                                        
-|*** RESPONSE 
+|*** RESPONSE |
 |                          All kinds of tile based games are fun, they are  
 |                          challenging and make me think. But, hm, I'm not  
 |                          sure.. let me think.. I also like the game Sorry 
@@ -34,7 +31,7 @@ Example (using fake data)
 |                          strategy games I've played, so yeah direct.      
 |
 |
-|PREDICTED SELECTED OPTION: strategize strategies strategy skill direct influence 
+|PREDICTED SELECTED OPTION | strategize strategies strategy skill direct influence 
 
 Options
 -------
