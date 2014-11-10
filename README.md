@@ -12,9 +12,9 @@ Example (using fake data)
 -------------------------
 |    | Result
 |-------------|--------
-|*** QUESTION | Speaker 1: Do you prefer direct competition where you can influence the other person, strategize (like in chess), OR indirect competition - where you cannot influence them, it's primarily about luck (like in bingo, Yahtzee)?                                    
-|*** RESPONSE | All kinds of tile based games are fun, they are challenging and make me think. But, hm, I'm not sure.. let me think.. I also like the game Sorry sometimes, but like, it's about luck and it's very fun but that is the only one I can think of. Overall, I don't like very much luck though. It can get kindof like, boring, with just like luck..you know? But I've enjoyed all the strategy games I've played, so yeah direct. 
-|PREDICTED SELECTED OPTION | strategize strategies strategy skill direct influence 
+| QUESTION | Speaker 1: Do you prefer direct competition where you can influence the other person, strategize (like in chess), OR indirect competition - where you cannot influence them, it's primarily about luck (like in bingo, Yahtzee)?                                    
+| RESPONSE | All kinds of tile based games are fun, they are challenging and make me think. But, hm, I'm not sure.. let me think.. I also like the game Sorry sometimes, but like, it's about luck and it's very fun but that is the only one I can think of. Overall, I don't like very much luck though. It can get kindof like, boring, with just like luck..you know? But I've enjoyed all the strategy games I've played, so yeah direct. 
+|PREDICTED SELECTION | direct competition
 
 Options
 -------
@@ -27,11 +27,6 @@ Options
 
 Methods
 =======
-
-Further Preprocessing: 
-* 'don’t' is replaced with 'do not'
-* 'didn’t' is replaced with 'did not'
-* 'not like' is replaced with 'notlike'
 
 1 Handling the word “not”
 -----------------------
@@ -68,6 +63,23 @@ Example:
 
 
 * See question 3 for more analysis of the “like”. 
+
+3 Nearby Positive Words and Frequency 
+-------------------------------------
+There are predicted keywords that will be used by the respondent to express which option they have selected. For example, if I ask "Do you like cookies or icecream more?" the one keyword set will be "cookies, cookie" for the first option and "icecream popsicles" for the second option. There may be a third option to express both with keywords such as "both either depends". 
+
+I use a queue to count how many positive words there within a distance of 5 words for each option set. For example, "I really enjoy cookies, they are great!" - the count for positive words surrounding the cookie option will increase by +2. 
+
+At the end of the response, each option will have a score to represent how many positive words there are surrounding all keywords expressing that option. This count will be multiplied by 2. Each option will also have a frequency count representing the number of times a word for that option was mentioned in the response.
+
+The total score for each option = frequency + positive_word_count*2
+
+Whichever option has the highest score is the one that this tool will predict was selected. It is important that Method (1) and (2) mentioned above were used so that we do not inaccurately count "like" as positive or ignore the importance of the "not" modifier. 
+
+Further Preprocessing: 
+* 'don’t' is replaced with 'do not'
+* 'didn’t' is replaced with 'did not'
+* 'not like' is replaced with 'notlike'
 
 How to run
 ==========
