@@ -7,8 +7,9 @@ will predict which option the respondent chose.
 
 It will also do the work of finding where each question was asked in the text file of the interview. It will aggregate all responses to each question and responses to follow up questions from each question. 
 
-* Tools: LIWC, Stanford Tagger 
-* Techniques: reinforcement learning, bag of words
+* Tools: LIWC (http://www.liwc.net), Stanford Tagger (http://nlp.stanford.edu/software/tagger.shtml)
+* NLP Techniques: reinforcement learning, bag of words
+* Data Structures used: trie, hash table, queue, nested objects, linked lists
 
 Example (using fake data)
 -------------------------
@@ -35,7 +36,7 @@ Methods
 The word 'not' is always a modifier to some other word. When 'not' encountered, we want to know what the respondent meant to apply it to. The Stanford Tagger is used to label words in the sentence after 'not' until it encounters the predicted subject of 'not'. It will look through words that fall into “linker” categories, as I call them, until it finds a word that is *not* a “connector”. A word is a “connector” if its part of speech is used to express a relationship between two other words. 
 
 Not will be applied to words coming after it - nouns and adjectives. 
-'<not> <connectors> <adjective or noun>'
+`not` `connectors` `adjective or noun`
 
 "Connector" parts of speech include: IN, VB, VBD, VBG, VBN, VBP, VBZ, DT, RB, RBR, RBS, TO
 
@@ -93,9 +94,12 @@ Use Command Line
 If no options are specified, the default printout will be given
 If no output file is given, output will print to stdout
 Options can be given in any combination.
+
 Available options are: a l f 
+
 template command: 
-java findsentiment <optional options here> <optional output file here> <inputfile here>
+
+java findsentiment `optional options here` `optional output file here` `inputfile here`
 
 example commands:
 -----------------
