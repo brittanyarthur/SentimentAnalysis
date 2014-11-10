@@ -11,12 +11,15 @@ class PreProcess{
   }
 	public static String Begin(String response){
         setUp();
-        response = response.replaceAll("[,']", "");
+        response = response.replaceAll("[,'’]", "");
+        response = response.replaceAll("dont", "do not");
+        response = response.replaceAll("didnt", "did not");
         response = RemoveLike(response);
         response = restoreCapitals(response);
         //response = response.replaceAll("don't", "not");
         //response = response.replaceAll("not like", "notlike");
         response = notWhat(response);
+        response = response.replaceAll("not like", "notlike");
         /*capitals need to be restored - in the next phase of processing, 
           BreakIterator uses capitals to infer where a sentence starts and ends*/
         response = restoreCapitals(response);
@@ -140,8 +143,8 @@ curr_sentence = curr_sentence.trim();
                      newresponse += response_words[k] + " ";
             	}
             }
-            print("l", findsentiment.Globals.cmd_options, "REPONSE WAS: " + response);
-            print("l", findsentiment.Globals.cmd_options, "NEW RESPONSE IS: " + newresponse);
+            print("l", findsentiment.Globals.cmd_options, "\n[LIKE CASE] REPONSE WAS: " + response);
+            print("l", findsentiment.Globals.cmd_options, "[LIKE CASE] NEW RESPONSE IS: " + newresponse);
             return newresponse.trim();
         } catch (IOException error) {
         	System.out.println("error occured reading in file.");

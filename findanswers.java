@@ -55,14 +55,14 @@ class findanswers{
     	 Keywords.keywordmap[1] = " "; //there are no options presented
 
     	//Do you prefer games where you are alone against other people or with others (on a team) against other people?
-      Keywords.keywordmap[2] = "alone team teams both";
+      Keywords.keywordmap[2] = "alone team teams both either depends"; 
 
    		//When playing alone or as part  of a team, do you prefer to play against people who are better, the same, or worse than you?
-      Keywords.keywordmap[3] = "better same worse equal both";
+      Keywords.keywordmap[3] = "better equal both same depends worse";
 
    		//Do you prefer direct competition - where you can influence the other person, strategize (like in chess), or indirect competition
    		//where you cannot influence them, it's primarily about luck (like in bingo, Yahtzee)?
-      Keywords.keywordmap[4] = "direct influence indirect luck both strategize strategies strategy";
+      Keywords.keywordmap[4] = "strategize strategies strategy skill direct influence indirect luck equal both depends";
 
    		//Are there any circumstances related to video gaming under which competition against others is motivating to you?
    		Keywords.keywordmap[5] = " "; //options are not given
@@ -75,39 +75,64 @@ class findanswers{
 
       option_set[2].synonym_set[0].optionID = "alone";
       option_set[2].synonym_set[1].optionID = "team teams";
-      option_set[2].synonym_set[2].optionID = "both";
+      option_set[2].synonym_set[2].optionID = "both either depends";
 
       option_set[3].synonym_set[0].optionID = "better";
-      option_set[3].synonym_set[1].optionID = "equal both same";
+      option_set[3].synonym_set[1].optionID = "equal both same depends";
       option_set[3].synonym_set[2].optionID = "worse";
 
       option_set[4].synonym_set[0].optionID = "strategize strategies strategy skill direct influence";
       option_set[4].synonym_set[1].optionID = "indirect";
       option_set[4].synonym_set[2].optionID = "luck";
-      option_set[4].synonym_set[3].optionID = "equal both";
+      option_set[4].synonym_set[3].optionID = "equal both depends";
 
       option_set[5].synonym_set[0].optionID = "";
 
       return option_set;
   }
 
+    //fill trie with positive words that allow for any extension
     public static TrieTree.Trie FillTrie(){
       TrieTree.Trie dict = new TrieTree.Trie(); 
       try{
         Scanner posListdata = new Scanner(new File("./utilities/positiveWordListLIWC")); 
         while(posListdata.hasNextLine()){
           String line = posListdata.nextLine();
-          line = line.replaceAll("\\*", "");
           String[] poswords = line.split(" ");
 
           for(int word_index = 0; word_index < poswords.length; word_index++){
-            TrieTree.fill(dict, poswords[word_index]);
+            if(poswords[word_index].contains("*")){
+               poswords[word_index] = poswords[word_index].replaceAll("\\*", "");
+               TrieTree.fill(dict, poswords[word_index]);
+            }
           }
         }
       } catch (IOException error) {
         System.out.println("error occured emotion>readFilePos");
       }
       return dict;
+    }
+
+    public static Hashtable<String, String> FillHash(){
+        //put all the positive words in a hash table
+        Hashtable<String, String> pos_table = new Hashtable<String, String>();
+        try{
+           Scanner posListdata = new Scanner(new File("./utilities/positiveWordListLIWC")); 
+           while(posListdata.hasNextLine()){
+               String line = posListdata.nextLine();
+               String[] poswords = line.split(" ");
+
+               for(int i = 0; i < poswords.length; i++){
+                   if(!poswords[i].contains("*")){
+                       poswords[i] = poswords[i].replaceAll("\\*", "");
+                       pos_table.put(poswords[i], poswords[i]);
+               }
+            }
+        }
+       } catch (IOException error) {
+         System.out.println("error occured emotion>readFilePos");
+       }
+       return pos_table;
     }
 
   public static void SetUp(String cmd_options){
@@ -131,7 +156,8 @@ class findanswers{
      */
   public static String OptionSelected(int q_num, String response){ 
       TrieTree.Trie dict = FillTrie();
-      
+      Hashtable<String, String> pos_table = FillHash();
+
       String answer = "";
       String keyword_options = Keywords.keywordmap[q_num];
       
@@ -146,7 +172,7 @@ class findanswers{
       answer += GetFrequency(keyword_options, response, q_num, ParentStorage.op_info);
       
       //find number of positive words per option
-      GetPositiveCount(response, dict, q_num, ParentStorage.op_info);
+      GetPositiveCount(response, dict, pos_table, q_num, ParentStorage.op_info);
 
       //Print out results
       int max = 0;
@@ -175,7 +201,7 @@ class findanswers{
     /*find the number of positive words 5 words away from option-words.
       The non-numeric is already stripped out from the PreProcess step. 
     */
-    public static void GetPositiveCount(String response, TrieTree.Trie dict, int q_num, OpInfoArray[] op_info){
+    public static void GetPositiveCount(String response, TrieTree.Trie dict, Hashtable<String, String> pos_table, int q_num, OpInfoArray[] op_info){
       //remove all non numeric
       BreakIterator iterator = BreakIterator.getSentenceInstance(Locale.US);
       iterator.setText(response);
@@ -186,6 +212,7 @@ class findanswers{
       for (int end = iterator.next(); end != BreakIterator.DONE; start = end, end = iterator.next()) {
         Queue<String> posFiveWordSpanQueue = new LinkedList<String>();
         String sentence = (response.substring(start,end)).toLowerCase();
+        sentence = sentence.replaceAll("[?!.,']", "");
         String[] processWords = sentence.split(" ");
         int positive_word_count = 0;
         boolean not_complete = true;
@@ -203,9 +230,10 @@ class findanswers{
               if(!posFiveWordSpanQueue.isEmpty() && (posFiveWordSpanQueue.size() > 5||wordIndex >= processWords.length)){
                 //checking for "look ahead" positive words as well
                 String pop = posFiveWordSpanQueue.remove();
-                String pop_pos_match = dict.getMatchingPrefix(pop);
+                String pop_pos_match_trie = dict.getMatchingPrefix(pop);
+                String pop_pos_match_hash = pos_table.get(pop);
                 //if we have poped off a positive word, then we will decrement the positive word count 
-                if(pop_pos_match!=null && !pop_pos_match.isEmpty()){
+                if((pop_pos_match_trie!=null && !pop_pos_match_trie.isEmpty()) || (pop_pos_match_hash!=null && !pop_pos_match_hash.isEmpty())){
                   --positive_word_count;
                 }
                 UpdatePositiveScore(pop, positive_word_count, q_num);
@@ -229,8 +257,9 @@ class findanswers{
               String temp = UpdatePositiveScore(processWords[wordIndex], positive_word_count, q_num);
    
               //check to see if the word is a positive word
-              String result = dict.getMatchingPrefix(processWords[wordIndex]);
-              if(result != null && !result.isEmpty()){
+              String result_trie = dict.getMatchingPrefix(processWords[wordIndex]);
+              String result_hash = pos_table.get(processWords[wordIndex]);
+              if((result_trie != null && !result_trie.isEmpty())||(result_hash != null && !result_hash.isEmpty())){
                 ++positive_word_count;
                 //System.out.println("+++++++++++++EXISTS // START ++++++++");
                 //System.out.println("result was: " + result + " from input word: " + processWords[wordIndex]);
