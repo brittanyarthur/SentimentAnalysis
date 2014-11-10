@@ -16,7 +16,7 @@ class parsetext{
  
         // The sample string
         //String sample = "But maybe not.  I’m not sure. from 504. you are not going to learn from people. from 801. NOTpeople was selected.";
-        String sample = "your like it. youre like it. you're like it. yours like it. youve like it. you've like it. ";
+        String sample = "I didn't find that movie to be funny.";
 
         // The tagged string
         String tagged = tagger.tagString(sample);

@@ -35,13 +35,12 @@ Further Preprocessing:
 
 1 Handling the word “not”
 -----------------------
-When the word “not” is encountered, we want to know what the respondent meant to apply it to. The Stanford Tagger labels each part of the sentence preceding “not”. It will look through words that fall into “linker” categories, as I call them, until it finds a word that is /not/ a “connector”. A word is a “connector” if its part of speech is used to express a relationship between two other words. 
+The word 'not' is always a modifier to some other word. When 'not' encountered, we want to know what the respondent meant to apply it to. The Stanford Tagger is used to label words in the sentence after 'not' until it encounters the predicted subject of 'not'. It will look through words that fall into “linker” categories, as I call them, until it finds a word that is *not* a “connector”. A word is a “connector” if its part of speech is used to express a relationship between two other words. 
 
-if the word “not” is seen I need to know - what is not applying to? not what? This is what the stanford parser helps with. 
 Not will be applied to words coming after it - nouns and adjectives. 
 '<not> <connectors> <adjective or noun>'
 
-Connectors parts of speech: IN, VB, VBD, VBG, VBN, VBP, VBZ, DT, RB, RBR, RBS, TO
+"Connector" parts of speech include: IN, VB, VBD, VBG, VBN, VBP, VBZ, DT, RB, RBR, RBS, TO
 
 See part of speech labels here: http://stackoverflow.com/questions/1833252/java-stanford-nlp-part-of-speech-labels
 
@@ -49,9 +48,9 @@ Example:
 
 | Input | Output
 |-------|-------
-|“Not any of the teams.” | "Not any of the NOTteams."
-
-I want to know: not *what?* Not is a modifier upon an object. This object is found by using some functionality from the Stanford parser and from LIWC. 
+| "Not any of the teams.” | "Not any of the NOTteams."
+| " I don't like to see any mess." | "I do notlike to see any NOTmess."
+| “I did not like the wind” | "I did not like the NOTwind"
 
 * See question 2 for good example analysis of the “like” cases and “not” cases.
 
@@ -59,43 +58,26 @@ I want to know: not *what?* Not is a modifier upon an object. This object is fou
 2 Handling the word “like”
 ------------------------
 
-See question 3 for analysis of the “like”. 
-Prior to any preprocessing:
-*** RESPONSE 
-                         | It's always more fun to play against people who  
-                         | are the same as me. I get bored playing if they  
-                         | are worse or better than me. I think the same is 
-                         | pretty great though, I play against equal        
-                         | competition frequently, equal and same. It like. 
-                         | You know like it. Because like i am. I like it.  
-                         | So like yesterday I went to beach and like, it   
-                         | was really cold. I don't know like how people    
-                         | can go surfing, but I guess they like it. I like 
-                         | the beach, really I do like to go, but like gosh 
-                         | why does it have to be so windy? I thought like, 
-                         | if I brought a sweater it could be alright. I    
-                         | didn't like the wind. 
+The word 'like' is an important word, as it can be used to express preference. However, it can also be used as a filler, for example "Then like, we ...". To handle this, LIWC is used in combination with the Stanford Tagger. LIWC provided a list of words that are pronouns, then the Tagger identified which were possessive pronouns. If a possessive pronoun precedes the word 'like', then 'like' is considered to be a positive word that expresses preference - such as "I like this". Or else, it is discarded. 
 
-After some preprocessing:
-[LIKE CASE] REPONSE WAS:  its always more fun to play against people who are the same as me. i get bored playing if they are worse or better than me. i think the same is pretty great though i play against equal competition frequently equal and same. it like. you know like it. because like i am. i like it. so like yesterday i went to beach and like it was really cold. i do not know like how people can go surfing but i guess they like it. i like the beach really i do like to go but like gosh why does it have to be so windy? i thought like if i brought a sweater it could be alright. i did not like the wind. 
+Example:
 
-After removing filler preprocessing:
-[LIKE CASE] NEW RESPONSE IS:  its always more fun to play against people who are the same as me. i get bored playing if they are worse or better than me. i think the same is pretty great though i play against equal competition frequently equal and same. it like. you know it. because i am. i like it. so yesterday i went to beach and it was really cold. i do not know how people can go surfing but i guess they like it. i like the beach really i do like to go but gosh why does it have to be so windy? i thought if i brought a sweater it could be alright. i did not like the wind.
-
-In addition, here is another case of the use of not being applied to its subject. Sentence was: “I did not like the wind”:  
-element: i
-element: did
-element: notlike
-element: the
-positive words in queue = 0
-for word (new element): notwind
+| Input | Output
+|-------|-------
+| So like yesterday I went to beach and like, it  was really cold. I don't know like how people can go surfing, but I guess they like it. I like the beach, really I do like to go, but like gosh why does it have to be so windy? I thought like, if I brought a sweater it could be alright. | so yesterday i went to beach and it was really cold. i do not know how people can go surfing but i guess they like it. i like the beach really i do like to go but gosh why does it have to be so windy? i thought if i brought a sweater it could be alright. 
 
 
-How to run:
+* See question 3 for more analysis of the “like”. 
+
+How to run
+==========
 
 First set classpath:
+--------------------
 export CLASSPATH=${CLASSPATH}:stanford-postagger-2011-04-20.jar:stanford-postagger.jar
 
+Use Command Line
+----------------
 If no options are specified, the default printout will be given
 If no output file is given, output will print to stdout
 Options can be given in any combination.
@@ -104,6 +86,7 @@ template command:
 java findsentiment <optional options here> <optional output file here> <inputfile here>
 
 example commands:
+-----------------
 java findsentiment inputfile
 java findsentiment -l results/Q8_500/option_like transcripts_q8/Q8_500
 
