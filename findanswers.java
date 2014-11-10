@@ -185,7 +185,8 @@ class findanswers{
       //process each sentence > look through the words in each sentence
       for (int end = iterator.next(); end != BreakIterator.DONE; start = end, end = iterator.next()) {
         Queue<String> posFiveWordSpanQueue = new LinkedList<String>();
-        String[] processWords = (response.substring(start,end)).split(" ");
+        String sentence = (response.substring(start,end)).toLowerCase();
+        String[] processWords = sentence.split(" ");
         int positive_word_count = 0;
         boolean not_complete = true;
         for(int wordIndex = 0; (wordIndex < processWords.length || not_complete); wordIndex++){
@@ -275,6 +276,7 @@ class findanswers{
         String answer = "";
         String[] options = keyword_options.split(" ");
         //remove all non numeric
+        response = response.toLowerCase();
         response = response.replaceAll("[^a-zA-Z0-9\\s]", "");
         String[] response_words = response.split(" ");
 
