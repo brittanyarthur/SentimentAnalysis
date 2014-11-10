@@ -36,7 +36,8 @@ Methods
 The word 'not' is always a modifier to some other word. When 'not' encountered, we want to know what the respondent meant to apply it to. The Stanford Tagger is used to label words in the sentence after 'not' until it encounters the predicted subject of 'not'. It will look through words that fall into “linker” categories, as I call them, until it finds a word that is *not* a “connector”. A word is a “connector” if its part of speech is used to express a relationship between two other words. 
 
 Not will be applied to words coming after it - nouns and adjectives. 
-`not` `connectors` `adjective or noun`
+
+`not` - `connectors` - `adjective or noun`
 
 "Connector" parts of speech include: IN, VB, VBD, VBG, VBN, VBP, VBZ, DT, RB, RBR, RBS, TO
 
@@ -49,8 +50,6 @@ Example:
 | "Not any of the teams.” | "Not any of the NOTteams."
 | " I don't like to see any mess." | "I do notlike to see any NOTmess."
 | “I did not like the wind” | "I did not like the NOTwind"
-
-* See question 2 for good example analysis of the “like” cases and “not” cases.
 
 
 2 Handling the word “like”
@@ -85,8 +84,8 @@ Further Preprocessing:
 How to run
 ==========
 
-First set classpath:
---------------------
+First add to classpath (Linux command):
+---------------------------------------
 export CLASSPATH=${CLASSPATH}:stanford-postagger-2011-04-20.jar:stanford-postagger.jar
 
 Use Command Line
