@@ -8,42 +8,74 @@ will predict which option the respondent chose.
 * Tools: LIWC, Stanford Tagger 
 * Techniques: reinforcement learning, bag of words
 
-Options
-=======
+Example (using fake data)
+-------------------------
 
-|Element | Attributes
+|---------------------------------------------------------------------------------------
+|-----------------------------------------Question #4-----------------------------------
+|---------------------------------------------------------------------------------------
+|
+|*** QUESTION 
+|                          Speaker 1: Do you prefer direct competition -     
+|                          where you can influence the other person,        
+|                          strategize (like in chess), OR indirect          
+|                          competition - where you cannot influence them,   
+|                          it's primarily about luck (like in bingo,        
+|                          Yahtzee)?                                        
+|*** RESPONSE 
+|                          All kinds of tile based games are fun, they are  
+|                          challenging and make me think. But, hm, I'm not  
+|                          sure.. let me think.. I also like the game Sorry 
+|                          sometimes, but like, it's about luck and it's    
+|                          very fun but that is the only one I can think    
+|                          of. Overall, I don't like very much luck though. 
+|                          It can get kindof like, boring, with just like   
+|                          luck..you know? But I've enjoyed all the         
+|                          strategy games I've played, so yeah direct.      
+|
+|
+|PREDICTED SELECTED OPTION: strategize strategies strategy skill direct influence 
+
+Options
+-------
+
+|Option | Description
 |------|----------
 | `-a` | Analysis. Gives output of Stanford tagger. Gives output of the queue. Gives frequency and nearby positive-word count for each option. The Stanford part of speech tagger is used to handle the word “not” - we would like to know what not is being applied to: not what? The queue is used to find the number of positive words ahead of each word and behind each word. The output only shows when an element is being added to the queue > it tells you how many positive words were in the queue at the time when the new element was being pushed. The frequency is used in predicting which option the respondent selected. Positive words are determined by LIWC. 
 | `-l` | Like Handling. This gives output of what the response looked like directly before removing filler likes and the output of the response after removing filler likes. Filler likes are removed using LIWC and the Stanford part of speech tagger. All words tagged as pronouns were gathered by LIWC, then the Stanford parser went through all of them and only kept the ones that were possessive pronouns. If a possessive pronouns precedes “like”, this implies that “like” in that context is a positive word. If a possessive pronoun does not precede like, it is regarded as a filler and removed. 
 | `-f` | Print out of fully preprocessed response is shown.
 
-Further Preprocessing: 
-don’t is replaced with do not
-didn’t is replaced with did not
-not like is replaced with notlike 
+Methods
+=======
 
-More information on handling “not”:
+Further Preprocessing: 
+* 'don’t' is replaced with 'do not'
+* 'didn’t' is replaced with 'did not'
+* 'not like' is replaced with 'notlike'
+
+Handling the word “not”
+-----------------------
 When the word “not” is encountered, we want to know what the respondent meant to apply it to. The Stanford Tagger labels each part of the sentence preceding “not”. It will look through words that fall into “linker” categories, as I call them, until it finds a word that is /not/ a “connector”. A word is a “connector” if its part of speech is used to express a relationship between two other words. 
 
-if I see the word “not” I need to know - what is not applying to? not what? This is what the stanford parser helps with. 
+if the word “not” is seen I need to know - what is not applying to? not what? This is what the stanford parser helps with. 
 Not will be applied to words coming after it - nouns and adjectives. 
-<not> <connectors> <adjective or noun> 
+'<not> <connectors> <adjective or noun>'
 
 Connectors parts of speech: IN, VB, VBD, VBG, VBN, VBP, VBZ, DT, RB, RBR, RBS, TO
 See part of speech labels here: http://stackoverflow.com/questions/1833252/java-stanford-nlp-part-of-speech-labels
 
-Examples using the test file: 
+|Examples using the test file:|
 
-See question 2 for analysis of the “like” cases and “not” cases. When someone says “not”,
+Input: '“Not any of the teams.”'
 I want to know: not /what/? One of the functions predicts what this /not/ is by using some functionality
-from the Stanford parser and from LIWC. To see what “not” was applied to, read the output of the queue. Example:
-element: not
-element: any
-element: of
-element: the
-positive words in queue = 0
-for word (new element): notteams
-Comes from the sentence: “Not any of the teams.”
+from the Stanford parser and from LIWC.
+Output: '"Not any of the NOTteams."'
+
+* See question 2 for good example analysis of the “like” cases and “not” cases.
+
+
+Handling the word “like”
+------------------------
 
 See question 3 for analysis of the “like”. 
 Prior to any preprocessing:
