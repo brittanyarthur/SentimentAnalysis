@@ -1,8 +1,21 @@
-Option “a” : Analysis. Gives output of Stanford tagger. Gives output of the queue. Gives frequency and nearby positive-word count for each option. The Stanford part of speech tagger is used to handle the word “not” - we would like to know what not is being applied to: not what? The queue is used to find the number of positive words ahead of each word and behind each word. The output only shows when an element is being added to the queue > it tells you how many positive words were in the queue at the time when the new element was being pushed. The frequency is used in predicting which option the respondent selected. Positive words are determined by LIWC. 
+Sentiment Analysis Tool for Interviews
+======================================
 
-Option “l”: Like Handling. This gives output of what the response looked like directly before removing filler likes and the output of the response after removing filler likes. Filler likes are removed using LIWC and the Stanford part of speech tagger. All words tagged as pronouns were gathered by LIWC, then the Stanford parser went through all of them and only kept the ones that were possessive pronouns. If a possessive pronouns precedes “like”, this implies that “like” in that context is a positive word. If a possessive pronoun does not precede like, it is regarded as a filler and removed. 
+This tool can be applied to sentiment analysis problems that arise during interviews.
+Given a set of options by the interviewer, and the response from the respondent, the tool 
+will predict which option the respondent chose. 
 
-Option “f”: Print out of fully preprocessed response is shown.
+* Tools: LIWC, Stanford Tagger 
+* Techniques: reinforcement learning, bag of words
+
+Options
+=======
+
+|Element | Attributes
+|------|----------
+| `-a` | Analysis. Gives output of Stanford tagger. Gives output of the queue. Gives frequency and nearby positive-word count for each option. The Stanford part of speech tagger is used to handle the word “not” - we would like to know what not is being applied to: not what? The queue is used to find the number of positive words ahead of each word and behind each word. The output only shows when an element is being added to the queue > it tells you how many positive words were in the queue at the time when the new element was being pushed. The frequency is used in predicting which option the respondent selected. Positive words are determined by LIWC. 
+| `-l` | Like Handling. This gives output of what the response looked like directly before removing filler likes and the output of the response after removing filler likes. Filler likes are removed using LIWC and the Stanford part of speech tagger. All words tagged as pronouns were gathered by LIWC, then the Stanford parser went through all of them and only kept the ones that were possessive pronouns. If a possessive pronouns precedes “like”, this implies that “like” in that context is a positive word. If a possessive pronoun does not precede like, it is regarded as a filler and removed. 
+| `-f` | Print out of fully preprocessed response is shown.
 
 Further Preprocessing: 
 don’t is replaced with do not
@@ -10,15 +23,14 @@ didn’t is replaced with did not
 not like is replaced with notlike 
 
 More information on handling “not”:
-When the word “not” is encountered, we want to know what the respondent meant to apply it to. The Stanford Tagger labels each part of the sentence preceding “not”. It will look through words that fall into “linker” categories, as I call them, until it finds a word that is /not/ a “linker”. A word is a “linker” if its part of speech is used to express a relationship between two other words. 
-Linker parts of speech: IN, VB, VBD, VBG, VBN, VBP, VBZ, DT, RB, RBR, RBS, TO
-See part of speech labels here: http://stackoverflow.com/questions/1833252/java-stanford-nlp-part-of-speech-labels
+When the word “not” is encountered, we want to know what the respondent meant to apply it to. The Stanford Tagger labels each part of the sentence preceding “not”. It will look through words that fall into “linker” categories, as I call them, until it finds a word that is /not/ a “connector”. A word is a “connector” if its part of speech is used to express a relationship between two other words. 
 
 if I see the word “not” I need to know - what is not applying to? not what? This is what the stanford parser helps with. 
 Not will be applied to words coming after it - nouns and adjectives. 
 <not> <connectors> <adjective or noun> 
 
-connectors: IN, VB, DT, RB, VBP, VBZ
+Connectors parts of speech: IN, VB, VBD, VBG, VBN, VBP, VBZ, DT, RB, RBR, RBS, TO
+See part of speech labels here: http://stackoverflow.com/questions/1833252/java-stanford-nlp-part-of-speech-labels
 
 Examples using the test file: 
 
