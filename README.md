@@ -1,9 +1,11 @@
 Sentiment Analysis Tool for Interviews
 ======================================
 
-This tool can be applied to sentiment analysis problems that arise during interviews.
+This tool can be applied to sentiment analysis problems that arise during natural language interviews.
 Given a set of options by the interviewer, and the response from the respondent, the tool 
 will predict which option the respondent chose. 
+
+It will also do the work of finding where each question was asked in the text file of the interview. It will aggregate all responses to each question and responses to follow up questions from each question. 
 
 * Tools: LIWC, Stanford Tagger 
 * Techniques: reinforcement learning, bag of words
@@ -62,8 +64,6 @@ Example:
 | So like yesterday I went to beach and like, it  was really cold. I don't know like how people can go surfing, but I guess they like it. I like the beach, really I do like to go, but like gosh why does it have to be so windy? I thought like, if I brought a sweater it could be alright. | so yesterday i went to beach and it was really cold. i do not know how people can go surfing but i guess they like it. i like the beach really i do like to go but gosh why does it have to be so windy? i thought if i brought a sweater it could be alright. 
 
 
-* See question 3 for more analysis of the “like”. 
-
 3 Nearby Positive Words and Frequency 
 -------------------------------------
 There are predicted keywords that will be used by the respondent to express which option they have selected. For example, if I ask "Do you like cookies or icecream more?" the one keyword set will be "cookies, cookie" for the first option and "icecream popsicles" for the second option. There may be a third option to express both with keywords such as "both either depends". 
@@ -100,6 +100,7 @@ java findsentiment <optional options here> <optional output file here> <inputfil
 example commands:
 -----------------
 java findsentiment inputfile
+
 java findsentiment -l results/Q8_500/option_like transcripts_q8/Q8_500
 
 

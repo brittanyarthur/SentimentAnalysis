@@ -1,5 +1,6 @@
-utiliites/positiveWordListLIWC
+utilities/positiveWordListLIWC
 parser
 *.class
 results/*
 transcripts_q8/*
+like/*
