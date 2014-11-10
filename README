@@ -1,0 +1,2 @@
+to run, set classpath:
+export CLASSPATH=${CLASSPATH}:stanford-postagger-2011-04-20.jar:stanford-postagger.jar

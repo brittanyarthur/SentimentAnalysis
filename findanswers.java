@@ -3,7 +3,7 @@ import java.io.*;
 import java.util.*;
 import java.text.BreakIterator;
 
-class findanswers{
+class findanswers{ 
 	protected static class Keywords{
     //contains options for the sentence
 		public static String[] keywordmap;
@@ -81,7 +81,7 @@ class findanswers{
       option_set[3].synonym_set[1].optionID = "equal both same";
       option_set[3].synonym_set[2].optionID = "worse";
 
-      option_set[4].synonym_set[0].optionID = "strategize strategies strategy direct influence";
+      option_set[4].synonym_set[0].optionID = "strategize strategies strategy skill direct influence";
       option_set[4].synonym_set[1].optionID = "indirect";
       option_set[4].synonym_set[2].optionID = "luck";
       option_set[4].synonym_set[3].optionID = "equal both";
@@ -202,11 +202,11 @@ class findanswers{
                 //checking for "look ahead" positive words as well
                 String pop = posFiveWordSpanQueue.remove();
                 String pop_pos_match = dict.getMatchingPrefix(pop);
-                UpdatePositiveScore(pop, positive_word_count, q_num);
                 //if we have poped off a positive word, then we will decrement the positive word count 
                 if(pop_pos_match!=null && !pop_pos_match.isEmpty()){
                   --positive_word_count;
                 }
+                UpdatePositiveScore(pop, positive_word_count, q_num);
                 if(posFiveWordSpanQueue.isEmpty()){
                   not_complete = false;
                   continue;
@@ -219,9 +219,9 @@ class findanswers{
 
               if(processWords[wordIndex]!=null && !processWords[wordIndex].isEmpty()){
               for(String s : posFiveWordSpanQueue) { 
-                    //System.out.println("element: " + s.toString()); 
+                    PreProcess.print("a", findsentiment.Globals.cmd_options, "element: " + s.toString()); 
                }
-               //System.out.println("positive words in queue = "+positive_word_count+"\nfor word (new element): "+processWords[wordIndex]+"\n\n");
+               PreProcess.print("a", findsentiment.Globals.cmd_options, "positive words in queue = "+positive_word_count+"\nfor word (new element): "+processWords[wordIndex]+"\n\n");
              }
              //find out which option this is and increment positive count for that selected option
               String temp = UpdatePositiveScore(processWords[wordIndex], positive_word_count, q_num);

@@ -15,7 +15,7 @@ class parsetext{
                 "models/left3words-wsj-0-18.tagger");
  
         // The sample string
-        String sample = "I really enjoy playing games, games are so much fun!";
+        String sample = "yeah, not teams. not any of the teams.";
  
         // The tagged string
         String tagged = tagger.tagString(sample);

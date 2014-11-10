@@ -1,4 +1,5 @@
 utiliites/positiveWordListLIWC
+parser
 *.class
 results/*
 transcripts_q8/*

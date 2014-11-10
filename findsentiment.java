@@ -98,6 +98,7 @@ class findsentiment{
   public static class Globals{
     public static int numberofquestions = 6;
     public static String cmd_options = "";
+    public static String file_destination = "";
   }
 
   private static class keyvalue
@@ -120,6 +121,11 @@ class findsentiment{
      if(args.length == 2){
          Globals.cmd_options = args[0];
          filename = args[1];
+     }
+     if(args.length == 3){
+         Globals.cmd_options = args[0];
+         Globals.file_destination = args[1];
+         filename = args[2];
      }
      keyvalue[] keyword_question = setquestions();
      findanswers.SetUp(Globals.cmd_options);
@@ -168,12 +174,12 @@ class findsentiment{
                continue;
        }
        //Index 2 is for question 2 and contains responses to q2 and so on...
-       System.out.println("---------------------------------------------------------------------------------------");
-       System.out.println("-----------------------------------------Question #"+question_num+"-----------------------------------");
-       System.out.println("---------------------------------------------------------------------------------------\n");
-       System.out.printf("%-10s \n", "*** QUESTION:");
+       PreProcess.print("", findsentiment.Globals.cmd_options, "---------------------------------------------------------------------------------------");
+       PreProcess.print("", findsentiment.Globals.cmd_options, "-----------------------------------------Question #"+question_num+"-----------------------------------");
+       PreProcess.print("", findsentiment.Globals.cmd_options, "---------------------------------------------------------------------------------------\n");
+       PreProcess.print("", findsentiment.Globals.cmd_options, "%-10s \n", "*** QUESTION");
        PreProcess.printCmdLineFormat(questions[question_num]);
-       System.out.printf("%-10s\n", "*** RESPONSE ");
+       PreProcess.print("", findsentiment.Globals.cmd_options, "%-10s\n", "*** RESPONSE ");
        PreProcess.printCmdLineFormat(responses[question_num]);
        findmeaning(responses, question_num, keyword_question);
        responses[question_num] = PreProcess.Begin(responses[question_num]);
@@ -204,7 +210,7 @@ class findsentiment{
             }
             if(question_num==0 && !printedyet_special_case && (curr_sentence.contains("yes")||curr_sentence.contains("yeah")||curr_sentence.contains("no")))
             {
-               System.out.println("==================___________Yes No Case: Special Case___________==================\n"+response[question_num].substring(start,end));
+               PreProcess.print("", findsentiment.Globals.cmd_options, "==================___________Yes No Case: Special Case___________==================\n"+response[question_num].substring(start,end));
             }
             //only the first sentence is examined.
             printedyet_special_case = true;
@@ -298,7 +304,7 @@ class findsentiment{
      
      //Do you prefer direct competition - where you can influence the other person, strategize (like in chess), or indirect competition
      //where you cannot influence them, it's primarily about luck (like in bingo, Yahtzee)?
-     keyvalue general_keywords4 = new keyvalue("direct influence strategize indirect luck", "direct competition% influence the other% indirect competition","");
+     keyvalue general_keywords4 = new keyvalue("direct influence strategize indirect luck skill", "direct competition% influence the other% indirect competition","");
      keyword_question[4] = general_keywords4;
      
      //Are there any circumstances related to video gaming under which competition against others is motivating to you?
