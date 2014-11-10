@@ -15,7 +15,7 @@ class parsetext{
                 "models/left3words-wsj-0-18.tagger");
  
         // The sample string
-        String sample = "yeah, not teams. not any of the teams.";
+        String sample = "But maybe not.  I’m not sure. from 504. you are not going to learn from people. from 801. NOTpeople was selected.";
  
         // The tagged string
         String tagged = tagger.tagString(sample);

@@ -17,8 +17,8 @@ class PreProcess{
         //response = response.replaceAll("don't", "not");
         //response = response.replaceAll("not like", "notlike");
         response = notWhat(response);
-        ///response = response.toLowerCase();
-        //response = response.replaceAll("[^a-zA-Z0-9\\s]", "");
+        /*capitals need to be restored - in the next phase of processing, 
+          BreakIterator uses capitals to infer where a sentence starts and ends*/
         response = restoreCapitals(response);
         print("f", findsentiment.Globals.cmd_options, "FULLY EDITED RESPONSE: " + response);
 		return response;
@@ -36,6 +36,7 @@ class PreProcess{
       Connectors.parts.add("RB");
       Connectors.parts.add("RBR");
       Connectors.parts.add("RBS");
+      Connectors.parts.add("TO");
   }
 
     protected static String restoreCapitals(String response){
@@ -60,26 +61,30 @@ class PreProcess{
       String newresponse = "";
       for (int end = iterator.next(); end != BreakIterator.DONE; start = end, end = iterator.next()) {
             String curr_sentence = response.substring(start,end).toLowerCase();
-            curr_sentence = curr_sentence.replaceAll("[.]", "");
+            curr_sentence = curr_sentence.replaceAll("[.,']", "");
             if(curr_sentence.contains("not ")){
+curr_sentence = curr_sentence.trim();
                   String tagged_sentence = parsetext.Tag(curr_sentence);
                   String[] tagged_words = tagged_sentence.split(" ");
                   String[] untagged_words = curr_sentence.split(" ");
+                  print("a", findsentiment.Globals.cmd_options, "UNTAGGED: %s\n", curr_sentence);
+                  print("a", findsentiment.Globals.cmd_options, "TAGGED:   %s\n", tagged_sentence);
                   for(int i = 0; i < untagged_words.length; i++){
                        if(tagged_words[i].length()>3){
                            if(tagged_words[i].substring(0,3).equals("not")){
-                               System.out.println("***************************\n***********\n********");
                                 //now searching for connectors to reach the object
                                 //do not include not: we will prepend it: newresponse += untagged_words[i];
-                               for(int k = i+1; k < untagged_words.length; k++){
+                               newresponse += untagged_words[i] + " ";
+                               for(int k = i+1; k < tagged_words.length; k++){
                                    i = k;
-                                   System.out.println("tagged set: " + tagged_words[k]);
                                    String[] word_tag = tagged_words[k].split("/");
                                   if(Connectors.parts.contains(word_tag[1].trim())){
-                                       //prepend not to this word, it is the predicted subject
-                                       newresponse += untagged_words[k] + " ";
+                                       newresponse += word_tag[0] + " ";
                                    }else{
-                                       newresponse += "NOT"+untagged_words[k] + " ";
+                                       //prepend not to this word, it is the predicted subject
+                                       newresponse += "NOT"+ word_tag[0] + " ";
+                                       ++i;
+                                       break;
                                    }
                                }
                            }else{
@@ -89,10 +94,9 @@ class PreProcess{
                          newresponse += untagged_words[i] + " ";
                        }
                    }
-            }else{ //if sentence does not contain 'not', then continue
+            }else{ 
               newresponse += curr_sentence;
             }
-       
        newresponse.trim();
        newresponse += ". ";     
      } 

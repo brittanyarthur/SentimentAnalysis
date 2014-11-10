@@ -168,14 +168,15 @@ class findanswers{
       if(Globals.cmd_options.contains("a")){
           score_info = " SCORE: "+max;
       }
-      PreProcess.print("",Globals.cmd_options,"\n\n====================    SELECTED OPTION: " + max_opt + score_info +"    ====================\n\n\n\n");
+      PreProcess.print("",Globals.cmd_options,"\n\n====== SELECTED OPTION: " + max_opt + score_info +" ======\n\n\n\n");
       return answer;
     }
 
-  //find the number of positive words 5 words away from option-words
+    /*find the number of positive words 5 words away from option-words.
+      The non-numeric is already stripped out from the PreProcess step. 
+    */
     public static void GetPositiveCount(String response, TrieTree.Trie dict, int q_num, OpInfoArray[] op_info){
       //remove all non numeric
-      response = response.replaceAll("[^a-zA-Z0-9\\s]", "");
       BreakIterator iterator = BreakIterator.getSentenceInstance(Locale.US);
       iterator.setText(response);
       int start = iterator.first();
