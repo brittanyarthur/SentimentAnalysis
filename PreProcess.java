@@ -72,13 +72,13 @@ class PreProcess{
                   String[] untagged_words = curr_sentence.split(" ");
                   print("a", findsentiment.Globals.cmd_options, "UNTAGGED: %s\n", curr_sentence);
                   print("a", findsentiment.Globals.cmd_options, "TAGGED:   %s\n", tagged_sentence);
-                  for(int i = 0; i < untagged_words.length; i++){
+                  for(int i = 0; i < untagged_words.length && i < tagged_words.length; i++){
                        if(tagged_words[i].length()>3){
                            if(tagged_words[i].substring(0,3).equals("not")){
                                 //now searching for connectors to reach the object
                                 //do not include not: we will prepend it: newresponse += untagged_words[i];
                                newresponse += untagged_words[i] + " ";
-                               for(int k = i+1; k < tagged_words.length; k++){
+                               for(int k = i+1; k < tagged_words.length && k < untagged_words.length; k++){
                                    i = k;
                                    String[] word_tag = tagged_words[k].split("/");
                                   if(Connectors.parts.contains(word_tag[1].trim())){
@@ -226,7 +226,12 @@ class PreProcess{
 
 } 
 
-
+/*
+java findsentiment - results/example/standard test
+java findsentiment -l results/example/option_like test
+java findsentiment -a results/example/option_analysis test
+java findsentiment -f results/example/option_full-edit test
+*/
 
 /*
 java findsentiment - results/Q8_500/standard transcripts_q8/Q8_500
@@ -242,6 +247,7 @@ java findsentiment - results/Q8_800/standard transcripts_q8/Q8_800
 java findsentiment - results/Q8_801/standard transcripts_q8/Q8_801
 java findsentiment - results/Q8_802/standard transcripts_q8/Q8_802
 java findsentiment - results/Q8_803/standard transcripts_q8/Q8_803
+java findsentiment - results/Q8_804/standard transcripts_q8/Q8_804
 */
 
 /*
@@ -258,6 +264,7 @@ java findsentiment -l results/Q8_800/option_like transcripts_q8/Q8_800
 java findsentiment -l results/Q8_801/option_like transcripts_q8/Q8_801
 java findsentiment -l results/Q8_802/option_like transcripts_q8/Q8_802
 java findsentiment -l results/Q8_803/option_like transcripts_q8/Q8_803
+java findsentiment -l results/Q8_804/option_like transcripts_q8/Q8_804
 */
 
 /*
@@ -274,5 +281,23 @@ java findsentiment -a results/Q8_800/option_analysis transcripts_q8/Q8_800
 java findsentiment -a results/Q8_801/option_analysis transcripts_q8/Q8_801
 java findsentiment -a results/Q8_802/option_analysis transcripts_q8/Q8_802
 java findsentiment -a results/Q8_803/option_analysis transcripts_q8/Q8_803
+java findsentiment -a results/Q8_804/option_analysis transcripts_q8/Q8_804
+*/
+
+/*
+java findsentiment -f results/Q8_500/option_full-edit transcripts_q8/Q8_500
+java findsentiment -f results/Q8_501/option_full-edit transcripts_q8/Q8_501
+java findsentiment -f results/Q8_503/option_full-edit transcripts_q8/Q8_503
+java findsentiment -f results/Q8_504/option_full-edit transcripts_q8/Q8_504
+java findsentiment -f results/Q8_505/option_full-edit transcripts_q8/Q8_505
+java findsentiment -f results/Q8_506/option_full-edit transcripts_q8/Q8_506
+java findsentiment -f results/Q8_507/option_full-edit transcripts_q8/Q8_507
+java findsentiment -f results/Q8_508/option_full-edit transcripts_q8/Q8_508
+java findsentiment -f results/Q8_509/option_full-edit transcripts_q8/Q8_509
+java findsentiment -f results/Q8_800/option_full-edit transcripts_q8/Q8_800
+java findsentiment -f results/Q8_801/option_full-edit transcripts_q8/Q8_801
+java findsentiment -f results/Q8_802/option_full-edit transcripts_q8/Q8_802
+java findsentiment -f results/Q8_803/option_full-edit transcripts_q8/Q8_803
+java findsentiment -f results/Q8_804/option_full-edit transcripts_q8/Q8_804
 */
 

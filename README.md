@@ -45,11 +45,11 @@ See part of speech labels here: http://stackoverflow.com/questions/1833252/java-
 
 Example: 
 
-| Input | Output
-|-------|-------
-| "Not any of the teams.” | "Not any of the NOTteams."
-| " I don't like to see any mess." | "I do notlike to see any NOTmess."
-| “I did not like the wind” | "I did not like the NOTwind"
+| Input | Tagger | Output
+|-------|--------|-------
+| "Not any of the teams.” | Not/RB any/DT of/IN the/DT teams/NNS ./. | "Not any of the NOTteams."
+| " I don't like to see any mess." | I/PRP do/VBP n't/RB like/VB to/TO see/VB any/DT mess/NN ./.  | "I do notlike to see any NOTmess."
+| “I did not like the wind.” | I/PRP did/VBD not/RB like/IN the/DT wind/NN ./.  | "I did not like the NOTwind."
 
 
 2 Handling the word “like”
@@ -98,7 +98,7 @@ Available options are: a l f
 
 template command: 
 
-java findsentiment `optional options here` `optional output file here` `inputfile here`
+java findsentiment `(optional options here)` `(optional output file here)` `(inputfile here)`
 
 example commands:
 -----------------
