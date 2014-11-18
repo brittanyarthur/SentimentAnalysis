@@ -33,7 +33,7 @@ Methods
 
 1 Handling the word “not”
 -----------------------
-The word 'not' is always a modifier to some other word. When 'not' encountered, we want to know what the respondent meant to apply it to. The Stanford Tagger is used to label words in the sentence after 'not' until it encounters the predicted subject of 'not'. It will look through words that fall into “linker” categories, as I call them, until it finds a word that is *not* a “connector”. A word is a “connector” if its part of speech is used to express a relationship between two other words. 
+The word 'not' is always a modifier to some other word. When 'not' encountered, we want to know what the respondent meant to apply it to. The Stanford Tagger is used to label words in the sentence after 'not' until it encounters the predicted subject of 'not'. It will look through words that fall into “connector” categories, as I call them, until it finds a word that is *not* a “connector”. A word is a “connector” if its part of speech is used to express a relationship between two other words. 
 
 Not will be applied to words coming after it - nouns and adjectives. 
 
@@ -49,7 +49,7 @@ Example:
 |-------|--------|-------
 | "Not any of the teams.” | Not/RB any/DT of/IN the/DT teams/NNS ./. | "Not any of the NOTteams."
 | " I don't like to see any mess." | I/PRP do/VBP n't/RB like/VB to/TO see/VB any/DT mess/NN ./.  | "I do notlike to see any NOTmess."
-| “I did not like the wind.” | I/PRP did/VBD not/RB like/IN the/DT wind/NN ./.  | "I did not like the NOTwind."
+| “I did not like the wind.” | I/PRP did/VBD not/RB like/IN the/DT wind/NN ./.  | "I did notlike the NOTwind."
 
 
 2 Handling the word “like”
@@ -68,7 +68,7 @@ Example:
 -------------------------------------
 There are predicted keywords that will be used by the respondent to express which option they have selected. For example, if I ask "Do you like cookies or icecream more?" the one keyword set will be "cookies, cookie" for the first option and "icecream popsicles" for the second option. There may be a third option to express both with keywords such as "both either depends". 
 
-I use a queue to count how many positive words there within a distance of 5 words for each option set. For example, "I really enjoy cookies, they are great!" - the count for positive words surrounding the cookie option will increase by +2. 
+I use a queue to count how many positive words there are within a distance of 5 words for each word in each option set. For example, "I really enjoy cookies, they are great!" - the count for positive words surrounding the cookie option will increase by +2. 
 
 At the end of the response, each option will have a score to represent how many positive words there are surrounding all keywords expressing that option. This count will be multiplied by 2. Each option will also have a frequency count representing the number of times a word for that option was mentioned in the response.
 
@@ -76,10 +76,12 @@ The total score for each option = frequency + positive_word_count*2
 
 Whichever option has the highest score is the one that this tool will predict was selected. It is important that Method (1) and (2) mentioned above were used so that we do not inaccurately count "like" as positive or ignore the importance of the "not" modifier. 
 
-Further Preprocessing: 
+4 Further Preprocessing: 
+------------------------
 * 'don’t' is replaced with 'do not'
 * 'didn’t' is replaced with 'did not'
 * 'not like' is replaced with 'notlike'
+*  non-numeric characters are removed, but periods and capital letters are restored to ensure that input is analyzed sentence by sentence as the response is passed from one analysis step to the next.
 
 How to run
 ==========
@@ -98,7 +100,7 @@ Available options are: a l f
 
 template command: 
 
-java findsentiment `(optional options here)` `(optional output file here)` `(inputfile here)`
+`java findsentiment` `(optional options here)` `(optional output file here)` `(inputfile here)`
 
 example commands:
 -----------------
@@ -106,4 +108,17 @@ java findsentiment inputfile
 
 java findsentiment -l results/Q8_500/option_like transcripts_q8/Q8_500
 
+fill in missing input:
+----------------------
 
+Due to the protection level of the files I am working with, I cannot put them on this repository. Here is what needs to be replaced to get this tool up and running:
+
+1. make a directory called utilities, and put a list of positive words into a file called positiveWordListLIWC or call it something else and edit the java code. The words need to be separated by spaces. If you would like to accept a word as being positive that has a particular beginning and any ending, use an asterisk to represent any. For example, if you want to include any variant of the word joy, such as joyful, joyous, joy - just put joy* 
+
+    to account for missing file create: utilities/positiveWordListLIWC
+    
+2. make a directory called 'like' and make a file called pronoun. Put a list of possessive pronouns into this file. The words need to be deliminated by spaces. The asterisk feature does not apply here. 
+
+    to account for missing file create:  like/pronoun
+    
+3. you will also have to adapt the program to meet the needs of your particular interview. there is a place in this program where questions are detected based on searching for enough keywords and key phrases unique to that question. that will need to be replaced by your own questions. There is also a place where groupings of key words likely to be found in responses are listed, when the respondent expresses which option they have selected. These key words are further grouped into sets where all the words in the set are representative of one option and are synonyms of eachother. This will need to be adapted for your own response categories.
