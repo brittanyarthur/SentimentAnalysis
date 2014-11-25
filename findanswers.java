@@ -4,11 +4,11 @@ import java.util.*;
 import java.text.BreakIterator;
 
 class ParentStorage {
-       private static QuestionSet[] op_info;
+       private static QInfoSet op_info[][];
        //singleton design pattern
        private static ParentStorage storage;
        private ParentStorage(int size){
-          op_info = new QuestionSet[size];
+          op_info = new QInfoSet[size][];
        }
        //this will only be called once
        public static ParentStorage setStorage(int size){
@@ -22,40 +22,33 @@ class ParentStorage {
           return storage;
        }
        public static void initIndex(int index, int size){
-          op_info[index] = new QuestionSet(size);
+          op_info[index] = new QInfoSet[size];
+          //initialize the fields in the array 
+          for (int i = 0; i < size; ++i) {
+                op_info[index][i] = new QInfoSet();
+          }
        }
        public static void setID(int option_index, int syn_index, String optionIDValue){
-          op_info[option_index].synonym_set[syn_index].optionID = optionIDValue;
+          op_info[option_index][syn_index].optionID = optionIDValue;
        } 
        public static void setIncrementFreq(int index_qnum, int index_option, int freq){
-          op_info[index_qnum].synonym_set[index_option].freq_count += freq;
+          op_info[index_qnum][index_option].freq_count += freq;
        }
        public static void setIncrementPosCount(int index_qnum, int index_option, int posCount){
-          op_info[index_qnum].synonym_set[index_option].pos_count += posCount;
+          op_info[index_qnum][index_option].pos_count += posCount;
        }
        public static int getFrequency(int index_qnum, int index_syn){
-          return ParentStorage.op_info[index_qnum].synonym_set[index_syn].freq_count;
+          return ParentStorage.op_info[index_qnum][index_syn].freq_count;
        }
        public static int getPositiveCount(int index_qnum, int index_syn){
-          return ParentStorage.op_info[index_qnum].synonym_set[index_syn].pos_count;
+          return ParentStorage.op_info[index_qnum][index_syn].pos_count;
        }
        public static String getOption(int index_qnum, int index_syn){
-          return ParentStorage.op_info[index_qnum].synonym_set[index_syn].optionID;
+          return ParentStorage.op_info[index_qnum][index_syn].optionID;
        }
        public static int getLengthSynSet(int question_num){
-          return (op_info[question_num].synonym_set).length;
+          return (op_info[question_num]).length;
        }
-       
-       protected static class QuestionSet{
-          protected QInfoSet[] synonym_set;
-          protected QuestionSet(int count){ 
-             QInfoSet[] op = new QInfoSet[count];
-             for (int i = 0; i < count; ++i) {
-                op[i] = new QInfoSet();
-             }
-          this.synonym_set = op;
-          }
-      }
       
        protected static class QInfoSet{
           protected String optionID;
