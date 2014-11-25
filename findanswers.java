@@ -9,9 +9,6 @@ class ParentStorage {
        private ParentStorage(int size){
           op_info = new QuestionSet[size];
        }
-       private ParentStorage(){
-          op_info = new QuestionSet[10];
-       }
        //this will only be called once
        public static ParentStorage setStorage(int size){
           if(storage == null){
