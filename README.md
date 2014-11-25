@@ -11,7 +11,7 @@ It will also do the work of finding where each question was asked in the text fi
 * NLP Techniques: reinforcement learning, bag of words
 * Data Structures used: trie, hash table, queue, nested objects, linked lists
 
-Example (using fake data)
+Example (using fake input data)
 -------------------------
 |    | Result
 |-------------|--------
