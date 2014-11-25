@@ -23,7 +23,8 @@ class PreProcess{
         /*capitals need to be restored - in the next phase of processing, 
           BreakIterator uses capitals to infer where a sentence starts and ends*/
         response = restoreCapitals(response);
-        print("f", findsentiment.Globals.cmd_options, "FULLY EDITED RESPONSE: " + response);
+        SettingOptions opts = SettingOptions.getOptions();
+        print("f", opts.get_cmds(), "FULLY EDITED RESPONSE: " + response);
 		return response;
 	}
 
@@ -59,6 +60,7 @@ class PreProcess{
     {
       //search for keywords: if a keyword is found, then look back 5 words to find positive words
       BreakIterator iterator = BreakIterator.getSentenceInstance(Locale.US);
+      SettingOptions opts = SettingOptions.getOptions();
       iterator.setText(response);
       int start = iterator.first();
       String newresponse = "";
@@ -70,8 +72,8 @@ class PreProcess{
                   String tagged_sentence = parsetext.Tag(curr_sentence);
                   String[] tagged_words = tagged_sentence.split(" ");
                   String[] untagged_words = curr_sentence.split(" ");
-                  print("a", findsentiment.Globals.cmd_options, "UNTAGGED: %s\n", curr_sentence);
-                  print("a", findsentiment.Globals.cmd_options, "TAGGED:   %s\n", tagged_sentence);
+                  print("a", opts.get_cmds(), "UNTAGGED: %s\n", curr_sentence);
+                  print("a", opts.get_cmds(), "TAGGED:   %s\n", tagged_sentence);
                   for(int i = 0; i < untagged_words.length && i < tagged_words.length; i++){
                        if(tagged_words[i].length()>3){
                            if(tagged_words[i].substring(0,3).equals("not")){
@@ -110,6 +112,7 @@ class PreProcess{
 	//this can be improved by using a hashtable. 
 	public static String RemoveLike(String response){
     String newresponse = "";
+    SettingOptions opts = SettingOptions.getOptions();
 		try {
 			Scanner pro_data = new Scanner(new File("./like/pronoun"));
             String all = pro_data.nextLine(); //the file is large but none of these are in it: \n
@@ -142,8 +145,8 @@ class PreProcess{
                      newresponse += response_words[k] + " ";
             	}
             }
-            print("l", findsentiment.Globals.cmd_options, "\n[LIKE CASE] REPONSE WAS: " + response);
-            print("l", findsentiment.Globals.cmd_options, "[LIKE CASE] NEW RESPONSE IS: " + newresponse);
+            print("l", opts.get_cmds(), "\n[LIKE CASE] REPONSE WAS: " + response);
+            print("l", opts.get_cmds(), "[LIKE CASE] NEW RESPONSE IS: " + newresponse);
             return newresponse.trim();
         } catch (IOException error) {
         	System.out.println("error occured reading in file.");
@@ -152,6 +155,7 @@ class PreProcess{
     }
 
    public static void printCmdLineFormat(String input){
+      SettingOptions opts = SettingOptions.getOptions();
       int size = 50; //size of line
       int start = 0;
       int end = size;
@@ -161,11 +165,11 @@ class PreProcess{
       while(end < input.length()){
            difference = getEndIndex(input, start, end);
            newstr += input.substring(start,end-difference) + "\n";
-           print("", findsentiment.Globals.cmd_options, "%25s|%-50s\n", "", input.substring(start,end-difference));
+           print("", opts.get_cmds(), "%25s|%-50s\n", "", input.substring(start,end-difference));
            start += size - difference;
            end += size - difference;
       }
-      print("", findsentiment.Globals.cmd_options, "%25s|%-50s\n","",input.substring(start, input.length()));
+      print("", opts.get_cmds(), "%25s|%-50s\n","",input.substring(start, input.length()));
   }
   
  protected static int getEndIndex(String input, int start, int end){
@@ -183,9 +187,10 @@ class PreProcess{
 
   //process options
   public static void print(String option, String cmd_options, String message){
-     if(findsentiment.Globals.file_destination != "" && cmd_options.contains(option)){
+     SettingOptions opts = SettingOptions.getOptions();
+     if(opts.get_file_destination() != "" && cmd_options.contains(option)){
          try{
-             PrintWriter writer = new PrintWriter(new FileOutputStream(new File(findsentiment.Globals.file_destination), true));
+             PrintWriter writer = new PrintWriter(new FileOutputStream(new File(opts.get_file_destination()), true));
              writer.println(message);
              writer.close();
          }catch (IOException error) {
@@ -197,9 +202,10 @@ class PreProcess{
   }
 
   public static void print(String option, String cmd_options, String format, String item1){
-     if(findsentiment.Globals.file_destination != "" && cmd_options.contains(option)){
+    SettingOptions opts = SettingOptions.getOptions();
+     if(opts.get_file_destination() != "" && cmd_options.contains(option)){
          try{
-             PrintWriter writer = new PrintWriter(new FileOutputStream(new File(findsentiment.Globals.file_destination), true));
+             PrintWriter writer = new PrintWriter(new FileOutputStream(new File(opts.get_file_destination()), true));
              writer.printf(format, item1);
              writer.close();
          }catch (IOException error) {
@@ -211,9 +217,10 @@ class PreProcess{
   }
 
   public static void print(String option, String cmd_options, String format, String item1, String item2){
-     if(findsentiment.Globals.file_destination != "" && cmd_options.contains(option)){
+     SettingOptions opts = SettingOptions.getOptions();
+     if(opts.get_file_destination() != "" && cmd_options.contains(option)){
          try{
-             PrintWriter writer = new PrintWriter(new FileOutputStream(new File(findsentiment.Globals.file_destination), true));
+             PrintWriter writer = new PrintWriter(new FileOutputStream(new File(opts.get_file_destination()), true));
              writer.printf(format, item1, item2);
              writer.close();
          }catch (IOException error) {

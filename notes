@@ -1,0 +1,26 @@
+Applying machine learning to sentiment analysis with a small data set
+
+result is data curation
+
+every data point updates a predictive model
+predictive system will adapt, builds up what the optimal prediction method is, given new information
+feed whether it made the right decision back into itself
+
+bag of words can be used as a feature to be trained as a classifier 
+: amount of negative words, amount of positive words
+length of the answer can be a feature 
+
+magnifier, strength words: really or 
+
+bag of words for the how positive
+> I wonder if counting the number of positive words vs. their proportion is a better predictor. 
+>> I should carry out that analysis by hand and see what the results are
+>> there is of course the subjectivity in what I regard as a very positive, etc. 
+>> Another feautre that might be interesting to consider is how long the response is
+>> Another feautre: # of positive words, # negative words (if I am going to use the Google API for predicting strength of reaction, perhaps LIWC method is suitable)
+
+aylien text analysis api
+
+call this a reinforcement learning 
+
+testing , life cycles , some uml

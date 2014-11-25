@@ -7,33 +7,6 @@ import java.text.BreakIterator;
 Program will be taking in a text file and partitioning it into distinct regions
 based on which question they are a part of.
 These regions will be stored in a string array.
-
-Applying machine learning to sentiment analysis with a small data set
-
-result is data curation
-
-every data point updates a predictive model
-predictive system will adapt, builds up what the optimal prediction method is, given new information
-feed whether it made the right decision back into itself
-
-bag of words can be used as a feature to be trained as a classifier 
-: amount of negative words, amount of positive words
-length of the answer can be a feature 
-
-magnifier, strength words: really or 
-
-bag of words for the how positive
-> I wonder if counting the number of positive words vs. their proportion is a better predictor. 
->> I should carry out that analysis by hand and see what the results are
->> there is of course the subjectivity in what I regard as a very positive, etc. 
->> Another feautre that might be interesting to consider is how long the response is
->> Another feautre: # of positive words, # negative words (if I am going to use the Google API for predicting strength of reaction, perhaps LIWC method is suitable)
-
-aylien text analysis api
-
-call this a reinforcement learning 
-
-testing , life cycles , some uml
 */
 
 class SearchStatus{
@@ -93,14 +66,38 @@ class SearchStatus{
     }
 }
 
+class SettingOptions{
+    private static String cmd_options = ""; //is this okay?
+    private static String file_destination;
+    private static SettingOptions opts;
+    private SettingOptions(){
+      this.cmd_options = "";
+      this.file_destination = "";
+    }
+    public static SettingOptions getOptions(){
+      if(opts == null){
+        opts = new SettingOptions();
+      }
+      return opts;
+    }
+    public static String get_cmds(){
+        return cmd_options;
+    }
+    public static void set_cmds(String cmds){
+        cmd_options = cmds;
+    }
+    public static String get_file_destination(){
+        return file_destination;
+    }
+    public static void set_file_destination(String filedestination){
+        file_destination = filedestination;
+    }
+}
+
 class findsentiment{
-
-  public static class Globals{
-    public static int numberofquestions = 6;
-    public static String cmd_options = "";
-    public static String file_destination = "";
+  public class Globals{
+    public static final int numberofquestions = 6;
   }
-
   private static class keyvalue
   {
      private String keywords;
@@ -116,19 +113,25 @@ class findsentiment{
 
   public static void main (String[] args)
   {
-     String filename = args[0]; //default 
-     Globals.cmd_options = "";
-     if(args.length == 2){
-         Globals.cmd_options = args[0];
-         filename = args[1];
-     }
-     if(args.length == 3){
-         Globals.cmd_options = args[0];
-         Globals.file_destination = args[1];
-         filename = args[2];
+     SettingOptions opts = SettingOptions.getOptions();
+     String filename = "";
+     switch(args.length){
+        case 0: System.out.println("ERROR: File required as an argument.");
+                return;
+        case 1: filename = args[0]; 
+                break;
+        case 2: opts.set_cmds(args[0]);
+                filename = args[1];
+                break;
+        case 3: opts.set_cmds(args[0]);
+                opts.set_file_destination(args[1]);
+                filename = args[2];
+                break;
+        default: System.out.println("ERROR: Too many arguments given. see README.");
+                return;
      }
      keyvalue[] keyword_question = setquestions();
-     findanswers.SetUp(Globals.cmd_options);
+     findanswers.SetUp(opts.get_cmds());
      ProcessFile(filename, keyword_question);
   }
 
@@ -170,20 +173,22 @@ class findsentiment{
   {
        for(int question_num = 0; question_num < responses.length; question_num++)
        {
-           if(responses[question_num]=="\n"){
-               continue;
-       }
-       //Index 2 is for question 2 and contains responses to q2 and so on...
-       PreProcess.print("", findsentiment.Globals.cmd_options, "---------------------------------------------------------------------------------------");
-       PreProcess.print("", findsentiment.Globals.cmd_options, "-----------------------------------------Question #"+question_num+"-----------------------------------");
-       PreProcess.print("", findsentiment.Globals.cmd_options, "---------------------------------------------------------------------------------------\n");
-       PreProcess.print("", findsentiment.Globals.cmd_options, "%-10s \n", "*** QUESTION");
-       PreProcess.printCmdLineFormat(questions[question_num]);
-       PreProcess.print("", findsentiment.Globals.cmd_options, "%-10s\n", "*** RESPONSE ");
-       PreProcess.printCmdLineFormat(responses[question_num]);
-       findmeaning(responses, question_num, keyword_question);
-       responses[question_num] = PreProcess.Begin(responses[question_num]);
-       String answer = findanswers.OptionSelected(question_num,responses[question_num]);
+           //ignore newlines. do not process them.
+          if(responses[question_num]=="\n"){
+             continue;
+          }
+          SettingOptions opts = SettingOptions.getOptions();
+          //Index 2 is for question 2 and contains responses to q2 and so on...
+          PreProcess.print("", opts.get_cmds(), "---------------------------------------------------------------------------------------");
+          PreProcess.print("", opts.get_cmds(), "-----------------------------------------Question #"+question_num+"-----------------------------------");
+          PreProcess.print("", opts.get_cmds(), "---------------------------------------------------------------------------------------\n");
+          PreProcess.print("", opts.get_cmds(), "%-10s \n", "*** QUESTION");
+          PreProcess.printCmdLineFormat(questions[question_num]);
+          PreProcess.print("", opts.get_cmds(), "%-10s\n", "*** RESPONSE ");
+          PreProcess.printCmdLineFormat(responses[question_num]);
+          findmeaning(responses, question_num, keyword_question);
+          responses[question_num] = PreProcess.Begin(responses[question_num]);
+          String answer = findanswers.OptionSelected(question_num,responses[question_num]);
      }
   }
 
@@ -208,9 +213,10 @@ class findsentiment{
             {
                printedyet = true;
             }
+            SettingOptions opts = SettingOptions.getOptions();
             if(question_num==0 && !printedyet_special_case && (curr_sentence.contains("yes")||curr_sentence.contains("yeah")||curr_sentence.contains("no")))
             {
-               PreProcess.print("", findsentiment.Globals.cmd_options, "==================___________Yes No Case: Special Case___________==================\n"+response[question_num].substring(start,end));
+               PreProcess.print("", opts.get_cmds(), "==================___________Yes No Case: Special Case___________==================\n"+response[question_num].substring(start,end));
             }
             //only the first sentence is examined.
             printedyet_special_case = true;

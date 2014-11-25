@@ -4,6 +4,8 @@ import java.util.*;
 import java.text.BreakIterator;
 
 /*
+THIS FILE IS NOT BEING USED ANYMORE. IT IS REPLACED BY FINDSENTIMENT.
+
 Program will be taking in a text file and partitioning it into distinct regions
 based on which question they are a part of.
 These regions will be stored in a string array.
@@ -139,7 +141,6 @@ class findquestions{
             curr_sentence = curr_sentence.toLowerCase();
             if(curr_sentence.contains(keywords[match]) && !printedyet)
             {
-               //System.out.println("***************************************For Analysis***************************************\n"+response[question_num].substring(start,end));
                printedyet = true;
             }
             if(question_num==0 && !printedyet_special_case && (curr_sentence.contains("yes")||curr_sentence.contains("yeah")||curr_sentence.contains("no")))
