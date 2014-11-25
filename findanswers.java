@@ -5,6 +5,7 @@ import java.text.BreakIterator;
 
 class ParentStorage {
        private static QuestionSet[] op_info;
+       //singleton design pattern
        private static ParentStorage storage;
        private ParentStorage(int size){
           op_info = new QuestionSet[size];
