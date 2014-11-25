@@ -96,25 +96,25 @@ class findanswers{
     * The predicted keyword of the answer is listed for each question.
     */
     protected static void FillMap(){
-		   Keywords.keywordmap = new String[Globals.number_options]; 
-		   //Is competition an important part of why you like to play video games?
+       Keywords.keywordmap = new String[Globals.number_options]; 
+       //Is competition an important part of why you like to play video games?
        Keywords.keywordmap[0] = "competition";
 
-     	 //What is it about competition that is motivating?
-    	 Keywords.keywordmap[1] = " "; //there are no options presented
+       //What is it about competition that is motivating?
+       Keywords.keywordmap[1] = " "; //there are no options presented
 
-    	//Do you prefer games where you are alone against other people or with others (on a team) against other people?
-      Keywords.keywordmap[2] = "alone team teams both either depends"; 
+       //Do you prefer games where you are alone against other people or with others (on a team) against other people?
+       Keywords.keywordmap[2] = "alone team teams both either depends"; 
 
-   		//When playing alone or as part  of a team, do you prefer to play against people who are better, the same, or worse than you?
-      Keywords.keywordmap[3] = "better equal both same depends worse";
+       //When playing alone or as part  of a team, do you prefer to play against people who are better, the same, or worse than you?
+       Keywords.keywordmap[3] = "better equal both same depends worse";
 
-   		//Do you prefer direct competition - where you can influence the other person, strategize (like in chess), or indirect competition
-   		//where you cannot influence them, it's primarily about luck (like in bingo, Yahtzee)?
-      Keywords.keywordmap[4] = "strategize strategies strategy skill direct influence indirect luck equal both depends";
+       //Do you prefer direct competition - where you can influence the other person, strategize (like in chess), or indirect competition
+       //where you cannot influence them, it's primarily about luck (like in bingo, Yahtzee)?
+       Keywords.keywordmap[4] = "strategize strategies strategy skill direct influence indirect luck equal both depends";
 
-   		//Are there any circumstances related to video gaming under which competition against others is motivating to you?
-   		Keywords.keywordmap[5] = " "; //options are not given
+       //Are there any circumstances related to video gaming under which competition against others is motivating to you?
+       Keywords.keywordmap[5] = " "; //options are not given
   }
     /**
     * Keywords are grouped. Two words are in the same grouping if they both suggest the same answer.
