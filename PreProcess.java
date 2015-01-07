@@ -16,8 +16,6 @@ class PreProcess{
         response = response.replaceAll("didnt", "did not");
         response = RemoveLike(response);
         response = restoreCapitals(response);
-        //response = response.replaceAll("don't", "not");
-        //response = response.replaceAll("not like", "notlike");
         response = notWhat(response);
         response = response.replaceAll("not like", "notlike");
         /*capitals need to be restored - in the next phase of processing, 
@@ -154,8 +152,9 @@ class PreProcess{
         return response;
     }
 
-   public static void printCmdLineFormat(String input){
+   public static void printFormattedBlock(String label, String input){
       SettingOptions opts = SettingOptions.getOptions();
+      print("", opts.get_cmds(), label);
       int size = 50; //size of line
       int start = 0;
       int end = size;
@@ -182,7 +181,7 @@ class PreProcess{
            ++difference;
            --new_end;
        }
-       return difference;//(curr_end==0)?0:
+       return difference;
   }
 
   //process options

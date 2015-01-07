@@ -3,24 +3,27 @@ import java.io.*;
 import java.util.*;
 import java.text.BreakIterator;
 
-class ParentStorage {
+class InterviewQuestionSet {
        private static QInfoSet op_info[][];
        //singleton design pattern
-       private static ParentStorage storage;
-       private ParentStorage(int size){
+       private static InterviewQuestionSet storage;
+       private InterviewQuestionSet(int size){
           op_info = new QInfoSet[size][];
        }
+
        //this will only be called once
-       public static ParentStorage setStorage(int size){
+       public static InterviewQuestionSet setStorage(int size){
           if(storage == null){
-              storage = new ParentStorage(size);
+              storage = new InterviewQuestionSet(size);
           }
           return storage;
        }
-       //get an existing ParentStorage object
-       public static ParentStorage getStorage(){
+
+       //get an existing InterviewQuestionSet object
+       public static InterviewQuestionSet getStorage(){
           return storage;
        }
+
        public static void initIndex(int index, int size){
           op_info[index] = new QInfoSet[size];
           //initialize the fields in the array 
@@ -38,13 +41,13 @@ class ParentStorage {
           op_info[index_qnum][index_option].pos_count += posCount;
        }
        public static int getFrequency(int index_qnum, int index_syn){
-          return ParentStorage.op_info[index_qnum][index_syn].freq_count;
+          return InterviewQuestionSet.op_info[index_qnum][index_syn].freq_count;
        }
        public static int getPositiveCount(int index_qnum, int index_syn){
-          return ParentStorage.op_info[index_qnum][index_syn].pos_count;
+          return InterviewQuestionSet.op_info[index_qnum][index_syn].pos_count;
        }
        public static String getOption(int index_qnum, int index_syn){
-          return ParentStorage.op_info[index_qnum][index_syn].optionID;
+          return InterviewQuestionSet.op_info[index_qnum][index_syn].optionID;
        }
        public static int getLengthSynSet(int question_num){
           return (op_info[question_num]).length;
@@ -70,29 +73,23 @@ class ParentStorage {
 
 class findanswers{ 
 
-    /**
-    * to do: Refactor this with get/set
+    /*
     * Contains all options and synonyms for the associated question (association by index)
     */
-  	protected static class Keywords{
-		   public static String[] keywordmap;
+  	protected static class Keywords {
+		   protected static String[] keywordmap;
 	  }
-
-    protected static class Globals{
-       public static final int number_options = 6;
-       public static String cmd_options = "";
-    }
 
     /**
     * The predicted keyword of the answer is listed for each question.
     */
     protected static void FillMap(){
-       Keywords.keywordmap = new String[Globals.number_options]; 
+       Keywords.keywordmap = new String[findsentiment.Globals.numberofquestions]; 
        //Is competition an important part of why you like to play video games?
        Keywords.keywordmap[0] = "competition";
 
        //What is it about competition that is motivating?
-       Keywords.keywordmap[1] = " "; //there are no options presented
+       Keywords.keywordmap[1] = " "; //options are not given
 
        //Do you prefer games where you are alone against other people or with others (on a team) against other people?
        Keywords.keywordmap[2] = "alone team teams both either depends"; 
@@ -107,53 +104,268 @@ class findanswers{
        //Are there any circumstances related to video gaming under which competition against others is motivating to you?
        Keywords.keywordmap[5] = " "; //options are not given
   }
+
     /**
     * Keywords are grouped. Two words are in the same grouping if they both suggest the same answer.
+    * note: store.initIndex takes 2 arguments. 
+    *       > Arg 1: question number. 
+    *       > Arg 2: number of answer sets. example: "equal both same" is one answer set.
     */
     protected static void InitializeOptionSets(){
-       ParentStorage store = ParentStorage.getStorage();
+       InterviewQuestionSet store = InterviewQuestionSet.getStorage();
+       store.initIndex(0,1);
        store.setID(0,0,"competition");
        
+       store.initIndex(1,1);
        store.setID(1,0,"");
 
+       store.initIndex(2,3);
        store.setID(2,0,"alone");
        store.setID(2,1,"team teams");
        store.setID(2,2,"both either depends");
 
+       store.initIndex(3,3);
        store.setID(3,0,"better");
        store.setID(3,1,"equal both same depends");
        store.setID(3,2,"worse");
 
+       store.initIndex(4,4);
        store.setID(4,0,"strategize strategies strategy skill direct influence");
        store.setID(4,1,"indirect");
        store.setID(4,2,"luck");
        store.setID(4,3,"equal both depends");
 
+       store.initIndex(5,1);
        store.setID(5,0,"");
    }
 
     /**
     * Creates a place where findings about frequency and positive counts can be stored.
-    * @param cmd_options The options are set.
-    * note: store.initIndex takes 2 arguments. 
-    *       > Arg 1: question number. 
-    *       > Arg 2: number of answer sets. example: "equal both same" is one answer set.
+    * @param cmd_options 
     */
-  public static void SetUp(String cmd_options){
+  public static void SetUp (){
       FillMap();
-      Globals.cmd_options = cmd_options;
-
-      ParentStorage store = ParentStorage.setStorage(Globals.number_options);
-      store.initIndex(0,1);
-      store.initIndex(1,1);
-      store.initIndex(2,3);
-      store.initIndex(3,3);
-      store.initIndex(4,4);
-      store.initIndex(5,1);
+      InterviewQuestionSet store = InterviewQuestionSet.setStorage(findsentiment.Globals.numberofquestions);
       InitializeOptionSets();
   }
 
-  /**
+   /**
+   * Finds the frequency for each keyword in response along with the number of positive words nearby it
+   * @Output The answer selected for that question
+   * @param q_num: question number
+   * @param response: a response to analyze 
+   */
+  public static void OptionSelected(int q_num, String response){ 
+     String keyword_options = Keywords.keywordmap[q_num]; 
+     //if there are no options presented for this question,
+     //an analysis of which option was selected cannot happen  
+     if(keyword_options.equals(" ")){
+        return;
+     }
+     TrieTree.Trie dict = FillTrie();
+     Hashtable<String, String> pos_table = FillHash();
+     InterviewQuestionSet storage = InterviewQuestionSet.getStorage();
+     SettingOptions opts = SettingOptions.getOptions();
+     String options = opts.get_cmds();
+
+     //get the frequency of each keyword in the response
+     GetFrequency(keyword_options, response, q_num);
+      
+     //find number of positive words per option
+     GetPositiveCount(response, dict, pos_table, q_num);
+
+     //DEBUG OPTION 'a' : Print out results
+     int max = 0;
+     String max_opt = "";
+     for(int k = 0; k < storage.getLengthSynSet(q_num); k++){
+        PreProcess.print("a",options, "========================================");
+        PreProcess.print("a",options, "Analysis for Question #"+q_num);
+        PreProcess.print("a",options, "Options are: " + storage.getOption(q_num, k));
+        PreProcess.print("a",options, "Frequency: " + storage.getFrequency(q_num, k));
+        PreProcess.print("a",options, "Positive Words: " + storage.getPositiveCount(q_num, k));
+       
+        int score = storage.getFrequency(q_num, k)+(2*storage.getPositiveCount(q_num, k));
+        if(score>max){
+           max = score; 
+           max_opt = storage.getOption(q_num, k);
+        }
+     }
+
+     String score_info = "";
+     if((options).contains("a")){
+        score_info = " SCORE: "+max;
+     }
+     PreProcess.print("",options,"\n\n====== SELECTED OPTION: " + max_opt + score_info +" ======\n\n\n\n");
+  }
+
+              
+   /**
+   * Finds the number of positive words 5 words away from option-words.
+   * note: The non-numeric is already stripped out from the PreProcess step. 
+   * @Output The answer selected for that question
+   * @param dict: a trie tree filled with positive words ending in * (any extension)
+   * @param pos_table: a hash table filled with positive words without any flexible extension 
+   * @param response: a response to analyze 
+   * @param q_num: the question number under analysis
+   * more info:
+   *   maintains a queue of size 5 of positive words 
+   *           everytime a new word is read in, we do three things:
+   *           1. we remove 1 item from the bottom of the queue
+   *           2. we check to see if it is a positive word
+   *           if it is, then we add it to the stack.
+   *           3. we check to see if it is an option.
+   *           if it is, then we check to see the size of the queue and add that
+   *           number to the number of words that are in a 5 word left-distance from the option
+   */
+   protected static void GetPositiveCount(String response, TrieTree.Trie dict, Hashtable<String, String> pos_table, int q_num){
+      BreakIterator iterator = BreakIterator.getSentenceInstance(Locale.US);
+      SettingOptions opts = SettingOptions.getOptions();
+      InterviewQuestionSet store = InterviewQuestionSet.getStorage();
+      iterator.setText(response);
+      int start = iterator.first();
+      double count = 0;
+
+      //process each sentence > look through the words in each sentence
+      for (int end = iterator.next(); end != BreakIterator.DONE; start = end, end = iterator.next()) {
+         Queue<String> posFiveWordSpanQueue = new LinkedList<String>();
+         String sentence = (response.substring(start,end)).toLowerCase();
+         sentence = sentence.replaceAll("[?!.,']", "");
+         String[] processWords = sentence.split(" ");
+         int positive_word_count = 0;
+         boolean not_complete = true;
+         for(int wordIndex = 0; (wordIndex < processWords.length || not_complete); wordIndex++){
+            boolean tempBool = false;
+            String test = response.substring(start,end);
+            if(!posFiveWordSpanQueue.isEmpty() && (posFiveWordSpanQueue.size() > 5||wordIndex >= processWords.length)){
+               //checking for "look ahead" positive words as well
+               String pop = posFiveWordSpanQueue.remove();
+               String pop_pos_match_trie = dict.getMatchingPrefix(pop);
+               String pop_pos_match_hash = pos_table.get(pop);
+               //if we have poped off a positive word, then we will decrement the positive word count 
+               if((pop_pos_match_trie!=null && !pop_pos_match_trie.isEmpty()) || (pop_pos_match_hash!=null && !pop_pos_match_hash.isEmpty())){
+                  --positive_word_count;
+               }
+               UpdatePositiveScore(pop, positive_word_count, q_num);
+               if(posFiveWordSpanQueue.isEmpty()){
+                  not_complete = false;
+                  continue;
+               }
+               if(wordIndex >= processWords.length){
+                  continue;
+               }
+            }
+            tempBool = false;
+
+            //DEBUG OPTION 'a' 
+            if (opts.get_cmds().contains("a")){
+               if(processWords[wordIndex]!=null && !processWords[wordIndex].isEmpty()){
+                 for(String s : posFiveWordSpanQueue) { 
+                       PreProcess.print("a", opts.get_cmds(), "element: " + s.toString()); 
+                  }
+                  PreProcess.print("a", opts.get_cmds(), "positive words in queue = "+positive_word_count+"\nfor word (new element): "+processWords[wordIndex]+"\n\n");
+               }
+            }
+
+            UpdatePositiveScore(processWords[wordIndex], positive_word_count, q_num);
+   
+            //check to see if the word is a positive word
+            String result_trie = dict.getMatchingPrefix(processWords[wordIndex]);
+            String result_hash = pos_table.get(processWords[wordIndex]);
+            if((result_trie != null && !result_trie.isEmpty())||(result_hash != null && !result_hash.isEmpty())){
+               ++positive_word_count;
+            }
+            //insert into queue
+            posFiveWordSpanQueue.add(processWords[wordIndex]);
+         }
+      }
+   }
+
+   /**
+   * Updates positive word count for a given keyword
+   * @param q_num: question number
+   * @param candidate_word: a word to search for
+   * @param positive_word_count: number of positive words in the stack
+   * note:  It is expensive finding which index a set of keywords is located in for every word - to mitigate this 
+   *        cost, first check to see if the word is even a keyword at all. If it is, then search through all the
+   *        synonym sets in the array to find which set the word belongs to. 
+   */
+  protected static void UpdatePositiveScore(String candidate_word, int positive_word_count, int q_num){
+     InterviewQuestionSet storage = InterviewQuestionSet.getStorage();
+     String[] options = (Keywords.keywordmap[q_num]).split(" ");
+        for(int i = 0; i < options.length; i++){
+        //if the word that is being examined is one of the keywords, find the set it belongs to (its index)
+           if(candidate_word.equals(options[i])){
+              int option_index = GetOptionIndex(options[i], storage, q_num);
+              //add to the positive score count for that number
+              storage.setIncrementPosCount(q_num, option_index, positive_word_count);
+           }
+        }
+   }
+
+   /**
+   * Gets the grouping # that the keyword is a part of. Synonyms to a single answer are in groups. 
+   * The index (grouping #) of that set is needed to increment the positive word count for that option.
+   * @param option: option that was detected to match response
+   * @param storage: InterviewQuestionSet object to get information about the groupings
+   * @param q_num: question number under analysis
+   */
+   protected static int GetOptionIndex(String option, InterviewQuestionSet storage, int q_num){
+      for(int i = 0; i < storage.getLengthSynSet(q_num); i++){
+         String optionID = storage.getOption(q_num, i);
+         String[] optionIDList = optionID.split(" ");
+         for(int k = 0; k < optionIDList.length; k++){
+            if(option.equals(optionIDList[k])){
+               return i;
+            }
+         }
+      }
+      return -1;
+   }
+
+   /**
+   * The frequency per option is found for a specific question.
+   * @param keyword_options: listing of options for a question
+   * @param response: response from interviewee
+   * @param q_num: question number under analysis
+   */
+   protected static void GetFrequency(String keyword_options, String response, int q_num){
+      InterviewQuestionSet store = InterviewQuestionSet.getStorage();
+      String[] options = keyword_options.split(" ");
+      //remove all non numeric
+      response = response.toLowerCase();
+      response = response.replaceAll("[^a-zA-Z0-9\\s]", "");
+      String[] response_words = response.split(" ");
+
+      //put all the options in a hash table
+      Hashtable<String, Integer> word_frequency_table = new Hashtable<String, Integer>();
+      for(int i = 0; i < options.length; i++){
+         if(word_frequency_table.get(options[i])==null){
+            word_frequency_table.put(options[i], 0);
+         }
+      }
+
+      //incremement the hash table for every word in the response that matches an option
+      for(int i = 0; i < response_words.length; i++){
+         if(word_frequency_table.get(response_words[i])==null){
+            continue;
+         }
+         int current_score = word_frequency_table.get(response_words[i]);
+         word_frequency_table.put(response_words[i], ++current_score);
+      }
+
+      //print out the results
+      for(int i = 0; i < options.length; i++){
+         int freq = word_frequency_table.get(options[i]);
+         int option_index = GetOptionIndex(options[i], store, q_num);
+         if(option_index == -1){
+            System.out.println("ERROR GIVEN WITH INPUT: " + options[i]);
+         }else{
+            store.setIncrementFreq(q_num, option_index, freq);
+         }
+      }
+   }
+
+     /**
     * Fill trie with positive words that allow for any extension.
     * @throws IOException
     */
@@ -201,225 +413,6 @@ class findanswers{
       }
       return pos_table;
   }
-
-   /**
-   * Finds the frequency for each keyword in response along with the number of positive words nearby it
-   * @Output The answer selected for that question
-   * @param q_num: question number
-   * @param response: a response to analyze 
-   */
-  public static String OptionSelected(int q_num, String response){ 
-     TrieTree.Trie dict = FillTrie();
-     Hashtable<String, String> pos_table = FillHash();
-     ParentStorage storage = ParentStorage.getStorage();
-     String answer = "";
-     String keyword_options = Keywords.keywordmap[q_num];   
-     if(q_num==0){
-        answer += "See special case response in addition.";
-     }
-     if(keyword_options==""){
-        answer = "This question does not present options -> will not be analyzed this way";
-     }
-
-     //get the frequency of each keyword in the response
-     answer += GetFrequency(keyword_options, response, q_num);
-      
-     //find number of positive words per option
-     GetPositiveCount(response, dict, pos_table, q_num);
-
-     //DEBUG OPTION 'a' : Print out results
-     int max = 0;
-     String max_opt = "";
-     for(int k = 0; k < storage.getLengthSynSet(q_num); k++){
-        PreProcess.print("a",Globals.cmd_options, "========================================");
-        PreProcess.print("a",Globals.cmd_options, "Analysis for Question #"+q_num);
-        PreProcess.print("a",Globals.cmd_options, "Options are: " + storage.getOption(q_num, k));
-        PreProcess.print("a",Globals.cmd_options, "Frequency: " + storage.getFrequency(q_num, k));
-        PreProcess.print("a",Globals.cmd_options, "Positive Words: " + storage.getPositiveCount(q_num, k));
-       
-        int score = storage.getFrequency(q_num, k)+(2*storage.getPositiveCount(q_num, k));
-        if(score>max){
-           max = score; 
-           max_opt = storage.getOption(q_num, k);
-        }
-     }
-
-     String score_info = "";
-     if(Globals.cmd_options.contains("a")){
-        score_info = " SCORE: "+max;
-     }
-     PreProcess.print("",Globals.cmd_options,"\n\n====== SELECTED OPTION: " + max_opt + score_info +" ======\n\n\n\n");
-     return answer;
-  }
-
-              
-   /**
-   * Finds the number of positive words 5 words away from option-words.
-   * note: The non-numeric is already stripped out from the PreProcess step. 
-   * @Output The answer selected for that question
-   * @param dict: a trie tree filled with positive words ending in * (any extension)
-   * @param pos_table: a hash table filled with positive words without any flexible extension 
-   * @param response: a response to analyze 
-   * @param q_num: the question number under analysis
-   * more info:
-   *   maintains a queue of size 5 of positive words 
-   *           everytime a new word is read in, we do three things:
-   *           1. we remove 1 item from the bottom of the queue
-   *           2. we check to see if it is a positive word
-   *           if it is, then we add it to the stack.
-   *           3. we check to see if it is an option.
-   *           if it is, then we check to see the size of the queue and add that
-   *           number to the number of words that are in a 5 word left-distance from the option
-   */
-   protected static void GetPositiveCount(String response, TrieTree.Trie dict, Hashtable<String, String> pos_table, int q_num){
-      BreakIterator iterator = BreakIterator.getSentenceInstance(Locale.US);
-      SettingOptions opts = SettingOptions.getOptions();
-      ParentStorage store = ParentStorage.getStorage();
-      iterator.setText(response);
-      int start = iterator.first();
-      double count = 0;
-
-      //process each sentence > look through the words in each sentence
-      for (int end = iterator.next(); end != BreakIterator.DONE; start = end, end = iterator.next()) {
-         Queue<String> posFiveWordSpanQueue = new LinkedList<String>();
-         String sentence = (response.substring(start,end)).toLowerCase();
-         sentence = sentence.replaceAll("[?!.,']", "");
-         String[] processWords = sentence.split(" ");
-         int positive_word_count = 0;
-         boolean not_complete = true;
-         for(int wordIndex = 0; (wordIndex < processWords.length || not_complete); wordIndex++){
-            boolean tempBool = false;
-            String test = response.substring(start,end);
-            if(!posFiveWordSpanQueue.isEmpty() && (posFiveWordSpanQueue.size() > 5||wordIndex >= processWords.length)){
-               //checking for "look ahead" positive words as well
-               String pop = posFiveWordSpanQueue.remove();
-               String pop_pos_match_trie = dict.getMatchingPrefix(pop);
-               String pop_pos_match_hash = pos_table.get(pop);
-               //if we have poped off a positive word, then we will decrement the positive word count 
-               if((pop_pos_match_trie!=null && !pop_pos_match_trie.isEmpty()) || (pop_pos_match_hash!=null && !pop_pos_match_hash.isEmpty())){
-                  --positive_word_count;
-               }
-               UpdatePositiveScore(pop, positive_word_count, q_num);
-               if(posFiveWordSpanQueue.isEmpty()){
-                  not_complete = false;
-                  continue;
-               }
-               if(wordIndex >= processWords.length){
-                  continue;
-               }
-            }
-            tempBool = false;
-
-            //DEBUG OPTION 'a' 
-            if(processWords[wordIndex]!=null && !processWords[wordIndex].isEmpty()){
-              for(String s : posFiveWordSpanQueue) { 
-                    PreProcess.print("a", opts.get_cmds(), "element: " + s.toString()); 
-               }
-               PreProcess.print("a", opts.get_cmds(), "positive words in queue = "+positive_word_count+"\nfor word (new element): "+processWords[wordIndex]+"\n\n");
-            }
-
-            UpdatePositiveScore(processWords[wordIndex], positive_word_count, q_num);
-   
-            //check to see if the word is a positive word
-            String result_trie = dict.getMatchingPrefix(processWords[wordIndex]);
-            String result_hash = pos_table.get(processWords[wordIndex]);
-            if((result_trie != null && !result_trie.isEmpty())||(result_hash != null && !result_hash.isEmpty())){
-               ++positive_word_count;
-            }
-            //insert into queue
-            posFiveWordSpanQueue.add(processWords[wordIndex]);
-         }
-      }
-   }
-
-   /**
-   * Updates positive word count for a given keyword
-   * @param q_num: question number
-   * @param candidate_word: a word to search for
-   * @param positive_word_count: number of positive words in the stack
-   * note:  It is expensive finding which index a set of keywords is located in for every word - to mitigate this 
-   *        cost, first check to see if the word is even a keyword at all. If it is, then search through all the
-   *        synonym sets in the array to find which set the word belongs to. 
-   */
-  protected static void UpdatePositiveScore(String candidate_word, int positive_word_count, int q_num){
-     ParentStorage storage = ParentStorage.getStorage();
-     String[] options = (Keywords.keywordmap[q_num]).split(" ");
-        for(int i = 0; i < options.length; i++){
-        //if the word that is being examined is one of the keywords, find the set it belongs to (its index)
-           if(candidate_word.equals(options[i])){
-              int option_index = GetOptionIndex(options[i], storage, q_num);
-              //add to the positive score count for that number
-              storage.setIncrementPosCount(q_num, option_index, positive_word_count);
-           }
-        }
-   }
-
-   /**
-   * Gets the grouping # that the keyword is a part of. Synonyms to a single answer are in groups. 
-   * The index (grouping #) of that set is needed to increment the positive word count for that option.
-   * @param option: option that was detected to match response
-   * @param storage: ParentStorage object to get information about the groupings
-   * @param q_num: question number under analysis
-   */
-   protected static int GetOptionIndex(String option, ParentStorage storage, int q_num){
-      for(int i = 0; i < storage.getLengthSynSet(q_num); i++){
-         String optionID = storage.getOption(q_num, i);
-         String[] optionIDList = optionID.split(" ");
-         for(int k = 0; k < optionIDList.length; k++){
-            if(option.equals(optionIDList[k])){
-               return i;
-            }
-         }
-      }
-      return -1;
-   }
-
-   /**
-   * The frequency per option is found for a specific question.
-   * @param keyword_options: listing of options for a question
-   * @param response: response from interviewee
-   * @param q_num: question number under analysis
-   */
-   protected static String GetFrequency(String keyword_options, String response, int q_num){
-      //the question number given maps to a listing of predicted subjects of the sentence for the response
-      ParentStorage store = ParentStorage.getStorage();
-      String answer = "";
-      String[] options = keyword_options.split(" ");
-      //remove all non numeric
-      response = response.toLowerCase();
-      response = response.replaceAll("[^a-zA-Z0-9\\s]", "");
-      String[] response_words = response.split(" ");
-
-      //put all the options in a hash table
-      Hashtable<String, Integer> word_frequency_table = new Hashtable<String, Integer>();
-      for(int i = 0; i < options.length; i++){
-         if(word_frequency_table.get(options[i])==null){
-            word_frequency_table.put(options[i], 0);
-         }
-      }
-
-      //incremement the hash table for every word in the response that matches an option
-      for(int i = 0; i < response_words.length; i++){
-         if(word_frequency_table.get(response_words[i])==null){
-            continue;
-         }
-         int current_score = word_frequency_table.get(response_words[i]);
-         word_frequency_table.put(response_words[i], ++current_score);
-      }
-
-      //print out the results
-      for(int i = 0; i < options.length; i++){
-         int freq = word_frequency_table.get(options[i]);
-         int option_index = GetOptionIndex(options[i], store, q_num);
-         if(option_index == -1){
-            System.out.println("ERROR GIVEN WITH INPUT: " + options[i]);
-         }else{
-            store.setIncrementFreq(q_num, option_index, freq);
-         }
-         answer += "\n<<" + options[i] + ">> frequency is: " + freq;
-      }
-      return answer;
-   }
 
 }
 
